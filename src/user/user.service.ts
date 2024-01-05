@@ -1,4 +1,12 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Pool } from 'pg';
 import { randomUUID } from 'crypto';
 import { hash } from 'bcryptjs';
@@ -10,7 +18,7 @@ import { CreateUserDto, CreateUserType, GetUserType, UpdateUserDto, UpdateUserTy
 export class UserService {
   constructor(@Inject(PG_CONNECTION) private readonly db: Pool) {}
 
-  async create(user: CreateUserDto): Promise<CreateUserType[]> {
+  async create(user: CreateUserDto): Promise<CreateUserType> {
     try {
       const hashedPassword = await hash(user.password, 12);
       const res = await this.db.query<CreateUserType>(
@@ -30,14 +38,17 @@ export class UserService {
           user.avatar,
         ],
       );
-      return res.rows;
+      return res.rows[0];
     } catch (err) {
       console.error(err);
+      if (err.code === '23505') {
+        throw new ConflictException('email or username address already registered');
+      }
       throw new InternalServerErrorException();
     }
   }
 
-  async update(id: string, payload: UpdateUserDto): Promise<UpdateUserType[]> {
+  async update(id: string, payload: UpdateUserDto): Promise<UpdateUserType> {
     try {
       if (payload.password) {
         payload.password = await hash(payload.password, 12);
@@ -58,14 +69,22 @@ export class UserService {
       `;
 
       const user = await this.db.query<UpdateUserType>(updateQuery, updateValues);
-      return user.rows;
+
+      if (user.rows.length === 0) {
+        throw new NotFoundException();
+      }
+
+      return user.rows[0];
     } catch (err) {
       console.error(err);
+      if (err instanceof NotFoundException) {
+        throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+      }
       throw new InternalServerErrorException();
     }
   }
 
-  async get(id: string): Promise<GetUserType[]> {
+  async get(id: string): Promise<GetUserType> {
     try {
       const user = await this.db.query<GetUserType>(
         `
@@ -76,25 +95,66 @@ export class UserService {
         [id],
       );
 
-      return user.rows;
+      if (user.rows.length === 0) {
+        throw new NotFoundException();
+      }
+
+      return user.rows[0];
     } catch (err) {
       console.error(err);
+      if (err instanceof NotFoundException) {
+        throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+      }
       throw new InternalServerErrorException();
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async getByUsername(username: string): Promise<any> {
     try {
-      await this.db.query(
+      const user = await this.db.query<any>(
         `
-        UPDATE users
-        SET is_active = false , updated_at = ${new Date().toISOString()}
-        WHERE id = $1;
-      `,
-        [id],
+          SELECT id, username, name, email, password, phone, birth_date, avatar, bio
+          FROM users 
+          WHERE username = $1;
+        `,
+        [username],
       );
+
+      if (user.rows.length === 0) {
+        throw new NotFoundException();
+      }
+
+      return user.rows[0];
     } catch (err) {
       console.error(err);
+      if (err instanceof NotFoundException) {
+        throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+      }
+      throw new InternalServerErrorException();
+    }
+  }
+  async delete(id: string): Promise<void> {
+    try {
+      const user = await this.db.query(
+        `
+        UPDATE users
+        SET is_active = false , updated_at = $2
+        WHERE id = $1
+        RETURNING id;
+      `,
+        [id, new Date().toISOString()],
+      );
+
+      if (user.rows.length === 0) {
+        throw new NotFoundException();
+      }
+
+      return;
+    } catch (err) {
+      console.error(err);
+      if (err instanceof NotFoundException) {
+        throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+      }
       throw new InternalServerErrorException();
     }
   }
