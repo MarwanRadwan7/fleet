@@ -94,8 +94,19 @@ export class PostService {
   async getById(userId: string, postId: string): Promise<GetPostType> {
     try {
       const query = `
-        SELECT * FROM posts 
-        WHERE id = $1 AND user_id = $2 ;
+        SELECT p.*, COALESCE(pl.likesCount, 0) AS likes_count, COALESCE(pc.commentsCount, 0) AS comments_count
+        FROM posts AS p
+        LEFT JOIN (
+          SELECT post_id, COUNT(post_id) AS likesCount
+          FROM post_likes
+          GROUP BY post_id
+        ) AS pl ON p.id = pl.post_id
+        LEFT JOIN (
+          SELECT post_id, COUNT(post_id) AS commentsCount
+          FROM post_comments
+          GROUP BY post_id
+        ) AS pc ON p.id = pc.post_id
+        WHERE p.id = $1 AND p.user_id = $2;
       `;
       const post = await this.db.query<GetPostType>(query, [postId, userId]);
       if (post.rows.length === 0) {
@@ -125,7 +136,7 @@ export class PostService {
         WHERE id = $1;
       `;
       const post = await this.db.query(query, [id]);
-      if (post.rows.length === 0) {
+      if (post.rowCount === 0) {
         throw new NotFoundException();
       }
     } catch (err) {
@@ -138,7 +149,7 @@ export class PostService {
   }
 }
 
-function generateSlug(username) {
+function generateSlug(username: string) {
   const combinedString = `${username}-${randomInt(1e12)}`;
   const slug = slugify(combinedString, {
     lower: true, // Convert to lowercase

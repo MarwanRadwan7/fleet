@@ -18,16 +18,18 @@ async function bootstrap() {
   app.enableCors({ allowedHeaders: '*' });
   app.use(helmet());
   // app.use(csurf());
+  app.disable('x-powered-by');
 
   app.use(compress());
   app.use(morgan('dev'));
-  app.disable('x-powered-by');
 
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
     }),
   );
+
+  app.setGlobalPrefix('api/v1');
 
   await app.listen(PORT);
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 
@@ -12,21 +12,26 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
   async validateUser(username: string, password: string): Promise<any> {
-    const user = await this.userService.getByUsername(username);
-    if (!user) return null;
+    try {
+      const user = await this.userService.getByUsername(username);
+      if (!user) return null;
 
-    const passwordValid = await bcrypt.compare(password, user.password);
-    if (!user) {
-      throw new NotFoundException('could not find the user');
+      const passwordValid = await bcrypt.compare(password, user.password);
+      if (!user) {
+        throw new NotFoundException('could not find the user');
+      }
+      if (user && passwordValid) {
+        delete user.password;
+        return user;
+      }
+      return null;
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException();
     }
-    if (user && passwordValid) {
-      delete user.password;
-      return user;
-    }
-    return null;
   }
   async login(user: LoginDto): Promise<LoginResponseDto> {
-    const payload = { id: user.id, username: user.username };
+    const payload = { id: user.id, sub: { username: user.username } };
     return {
       access_token: await this.jwtService.signAsync(payload),
       refresh_token: await this.jwtService.signAsync(payload, { expiresIn: '7d' }),
@@ -34,7 +39,7 @@ export class AuthService {
   }
 
   async refreshToken(user: LoginDto): Promise<RefreshTokenResponseDto> {
-    const payload = { id: user.id, username: user.username };
+    const payload = { id: user.id, sub: { username: user.username } };
     return {
       access_token: await this.jwtService.signAsync(payload),
     };
