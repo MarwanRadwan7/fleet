@@ -1,5 +1,7 @@
 import { IsDecimal, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
+import { Post } from '../post.interface';
+
 export class UpdatePostDto {
   @IsString()
   @IsNotEmpty()
@@ -22,3 +24,5 @@ export class UpdatePostDto {
   @IsOptional()
   lng: number;
 }
+
+export interface UpdatePostType extends Post {}

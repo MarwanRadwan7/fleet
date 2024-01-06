@@ -1,3 +1,3 @@
 import { Post } from '../post.interface';
 
-export interface GetPostDto extends Post {}
+export interface GetPostType extends Post {}

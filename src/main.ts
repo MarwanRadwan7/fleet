@@ -2,15 +2,22 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { AppModule } from './app.module';
+import helmet from 'helmet';
 import * as compress from 'compression';
 import * as morgan from 'morgan';
+// import * as csurf from 'csurf';
+
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  // Inject ConfigService
   const configService = app.get(ConfigService);
   const PORT = configService.get('PORT') || 3000;
+
+  // Security Middlewares
+  app.enableCors({ allowedHeaders: '*' });
+  app.use(helmet());
+  // app.use(csurf());
 
   app.use(compress());
   app.use(morgan('dev'));
