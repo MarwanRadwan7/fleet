@@ -4,7 +4,7 @@ import { MigrationBuilder, ColumnDefinitions } from 'node-pg-migrate';
 export const shorthands: ColumnDefinitions | undefined = undefined;
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
-  await pgm.sql(`
+  return pgm.sql(`
     CREATE TABLE users (
       id VARCHAR(240) PRIMARY KEY,
       username VARCHAR(30) NOT NULL UNIQUE,
@@ -24,7 +24,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
 }
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
-  await pgm.sql(`
+  return pgm.sql(`
     DROP TABLE users;
   `);
 }

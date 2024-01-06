@@ -113,7 +113,7 @@ export class UserService {
     try {
       const user = await this.db.query<any>(
         `
-          SELECT id, username, name, email, password, phone, birth_date, avatar, bio
+          SELECT id, username, name, email, password
           FROM users 
           WHERE username = $1;
         `,

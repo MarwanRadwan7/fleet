@@ -26,7 +26,9 @@ export class AuthService {
     return null;
   }
   async login(user: LoginDto): Promise<LoginResponseDto> {
-    const payload = { id: user.id, sub: { username: user.username } };
+    console.log(user);
+
+    const payload = { id: user.id, username: user.username };
     return {
       access_token: await this.jwtService.signAsync(payload),
       refresh_token: await this.jwtService.signAsync(payload, { expiresIn: '7d' }),
@@ -34,7 +36,7 @@ export class AuthService {
   }
 
   async refreshToken(user: LoginDto): Promise<RefreshTokenResponseDto> {
-    const payload = { id: user.id, sub: { username: user.username } };
+    const payload = { id: user.id, username: user.username };
     return {
       access_token: await this.jwtService.signAsync(payload),
     };
