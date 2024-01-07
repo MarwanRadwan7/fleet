@@ -9,10 +9,16 @@ import {
   Post,
   Req,
   UseGuards,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+
 import { PostService } from './post.service';
 import { JwtGuard } from 'src/auth/guard';
-import { CreatePostDto } from './dto';
+import { CreatePostDto, CreatePostType } from './dto';
+import { ParsePipe, SharpTransformPipe } from './pipe';
+import { UserDataDto } from 'src/user/dto/data-user.dto';
 
 @Controller('posts')
 export class PostController {
@@ -20,10 +26,28 @@ export class PostController {
 
   @Post('/')
   @UseGuards(JwtGuard)
-  async create(@Req() req, @Body() postBody: CreatePostDto) {
-    const post = await this.postService.create(req.user.id, req.user.sub.username, postBody);
+  @UseInterceptors(FileInterceptor('media'))
+  async create(
+    @Req() req,
+    @UploadedFile(ParsePipe, SharpTransformPipe)
+    media: Express.Multer.File,
+    @Body()
+    payload: CreatePostDto,
+  ) {
+    const userData: UserDataDto = { user_id: req.user.id, username: req.user.sub.username };
+    let post: CreatePostType;
+    payload['media_url'] = null;
+
+    if (media) {
+      payload['media_url'] = (await this.postService.uploadMedia(media)).secure_url;
+      post = await this.postService.create(userData, payload);
+    } else {
+      post = await this.postService.create(userData, payload);
+    }
+
     return { statusCode: 201, message: 'post created successfully', data: { post } };
   }
+
   @Patch('/:id')
   @UseGuards(JwtGuard)
   async update(@Req() req, @Param('id') postId: string, @Body() postBody: CreatePostDto) {

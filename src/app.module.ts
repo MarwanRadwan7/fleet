@@ -8,8 +8,19 @@ import { FollowModule } from './follow/follow.module';
 import { BlockModule } from './block/block.module';
 import { LikeModule } from './like/like.module';
 import { CommentModule } from './comment/comment.module';
-
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), UserModule, DbModule, AuthModule, PostModule, FollowModule, BlockModule, LikeModule, CommentModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    UserModule,
+    DbModule,
+    AuthModule,
+    PostModule,
+    FollowModule,
+    BlockModule,
+    LikeModule,
+    CommentModule,
+    CloudinaryModule,
+  ],
 })
 export class AppModule {}

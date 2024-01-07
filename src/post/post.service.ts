@@ -10,23 +10,21 @@ import slugify from 'slugify';
 
 import { PG_CONNECTION } from 'src/db/db.module';
 import { CreatePostDto, CreatePostType, GetPostType, UpdatePostDto, UpdatePostType } from './dto';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { CloudinaryResponse } from 'src/cloudinary/dto';
+import { UserDataDto } from 'src/user/dto/data-user.dto';
 
 @Injectable()
 export class PostService {
-  constructor(@Inject(PG_CONNECTION) private readonly db: Pool) {}
+  constructor(
+    @Inject(PG_CONNECTION) private readonly db: Pool,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
-  /**
-   * Creates a new post in the database.
-   * @param userId - The ID of the user creating the post.
-   * @param username - The username of the user creating the post.
-   * @param payload - The data for the new post.
-   * @returns The created post.
-   * @throws InternalServerErrorException if an error occurs during the creation process.
-   */
-  async create(userId: string, username: string, payload: CreatePostDto): Promise<CreatePostType> {
+  async create(userData: UserDataDto, payload: CreatePostDto): Promise<CreatePostType> {
     try {
       const postId = randomUUID();
-      const slug = generateSlug(username);
+      const slug = generateSlug(userData.username);
       const fields = ['id', 'slug', ...Object.keys(payload)];
       const values = [postId, slug, ...Object.values(payload)];
 
@@ -36,7 +34,7 @@ export class PostService {
         RETURNING *;
       `;
 
-      const post = await this.db.query<CreatePostType>(query, [userId, ...values]);
+      const post = await this.db.query<CreatePostType>(query, [userData.user_id, ...values]);
       return post.rows[0];
     } catch (err) {
       console.error(err);
@@ -44,15 +42,6 @@ export class PostService {
     }
   }
 
-  /**
-   * Updates an existing post in the database.
-   * @param userId - The ID of the user updating the post.
-   * @param postId - The ID of the post to update.
-   * @param payload - The data to update the post with.
-   * @returns The updated post.
-   * @throws NotFoundException if the post is not found.
-   * @throws InternalServerErrorException if an error occurs during the update process.
-   */
   async update(userId: string, postId: string, payload: UpdatePostDto): Promise<UpdatePostType> {
     try {
       payload['updated_at'] = new Date().toISOString();
@@ -83,14 +72,6 @@ export class PostService {
     }
   }
 
-  /**
-   * Retrieves a post from the database by its ID and user ID.
-   * @param userId - The ID of the user retrieving the post.
-   * @param postId - The ID of the post to retrieve.
-   * @returns The retrieved post.
-   * @throws NotFoundException if the post is not found.
-   * @throws InternalServerErrorException if an error occurs during the retrieval process.
-   */
   async getById(userId: string, postId: string): Promise<GetPostType> {
     try {
       const query = `
@@ -123,12 +104,6 @@ export class PostService {
     }
   }
 
-  /**
-   * Deletes a post from the database by its ID.
-   * @param id - The ID of the post to delete.
-   * @throws NotFoundException if the post is not found.
-   * @throws InternalServerErrorException if an error occurs during the deletion process.
-   */
   async delete(id: string): Promise<void> {
     try {
       const query = `
@@ -144,6 +119,15 @@ export class PostService {
       if (err instanceof NotFoundException) {
         throw new NotFoundException('post not found');
       }
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async uploadMedia(media: Express.Multer.File): Promise<CloudinaryResponse> {
+    try {
+      return await this.cloudinaryService.uploadFile(media);
+    } catch (err) {
+      console.error(err);
       throw new InternalServerErrorException();
     }
   }
