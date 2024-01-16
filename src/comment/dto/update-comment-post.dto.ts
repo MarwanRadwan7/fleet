@@ -1,13 +1,16 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class UpdateCommentPostDto {
+  user_id: string;
+  comment_id: string;
+
   @IsNotEmpty()
   @IsString()
-  postId: string;
+  post_id: string;
 
   @IsNotEmpty()
   @IsString()
   content: string;
 }
 
-export type UpdateCommentPostType = { id: string; comment: string };
+export type UpdateCommentPostResponseDto = { id: string; comment: string };
