@@ -5,7 +5,10 @@ import { Comment } from '../comment.interface';
 export class GetCommentPostDto {
   @IsNotEmpty()
   @IsString()
-  id: string;
+  comment_id: string;
+
+  @IsString()
+  user_id: string;
 }
 
-export interface GetCommentPostType extends Comment {}
+export interface GetCommentPostResponseDto extends Comment {}

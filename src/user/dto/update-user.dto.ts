@@ -41,7 +41,7 @@ export class UpdateUserDto {
   location: string;
 }
 
-export type UpdateUserType = Omit<
+export type UpdateUserResponseDto = Omit<
   User,
   'password' | 'isActive' | 'role' | 'location' | 'created_at' | 'updated_at'
 >;

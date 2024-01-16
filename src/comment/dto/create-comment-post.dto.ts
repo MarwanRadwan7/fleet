@@ -3,11 +3,13 @@ import { IsNotEmpty, IsString } from 'class-validator';
 export class CreateCommentPostDto {
   @IsNotEmpty()
   @IsString()
-  postId: string;
+  post_id: string;
 
   @IsNotEmpty()
   @IsString()
   content: string;
+
+  user_id: string;
 }
 
-export type CreateCommentPostType = { id: string; comment: string };
+export type CreateCommentPostResponseDto = { id: string; comment: string };

@@ -13,7 +13,12 @@ import {
 
 import { CommentService } from './comment.service';
 import { JwtGuard } from 'src/auth/guard';
-import { CreateCommentPostDto, GetCommentPostDto, UpdateCommentPostDto } from './dto';
+import {
+  CreateCommentPostDto,
+  DeleteCommentPostDto,
+  GetCommentPostDto,
+  UpdateCommentPostDto,
+} from './dto';
 
 @Controller('comments')
 export class CommentController {
@@ -21,30 +26,38 @@ export class CommentController {
 
   @Post('/')
   @UseGuards(JwtGuard)
-  async create(@Req() req, @Body() commentBody: CreateCommentPostDto) {
-    const comment = await this.commentService.create(req.user.id, commentBody);
+  async create(@Req() req, @Body() payload: CreateCommentPostDto) {
+    payload.user_id = req.user.id;
+    const comment = await this.commentService.create(payload);
     return { statusCode: 201, message: 'comment created successfully', data: comment };
   }
-  @Patch('/:commentId')
+
+  @Patch('/:comment_id')
   @UseGuards(JwtGuard)
   async update(
     @Req() req,
-    @Param('commentId') commentId: string,
-    @Body() commentBody: UpdateCommentPostDto,
+    @Param('comment_id') commentId: string,
+    @Body() payload: UpdateCommentPostDto,
   ) {
-    const comment = await this.commentService.update(req.user.id, commentId, commentBody);
+    payload.user_id = req.user.id;
+    payload.comment_id = commentId;
+    const comment = await this.commentService.update(payload);
     return { statusCode: 200, message: 'comment updated successfully', data: comment };
   }
-  @Get('/:commentId')
+
+  @Get('/:comment_id')
   @UseGuards(JwtGuard)
-  async get(@Req() req, @Body() commentBody: GetCommentPostDto) {
-    const comment = await this.commentService.get(req.user.id, commentBody);
+  async get(@Req() req, @Param('comment_id') commentId: string) {
+    const commentInfo: GetCommentPostDto = { user_id: req.user.id, comment_id: commentId };
+    const comment = await this.commentService.get(commentInfo);
     return { statusCode: 200, message: 'comment retrieved successfully', data: comment };
   }
-  @Delete('/:commentId')
+
+  @Delete('/:comment_id')
   @HttpCode(204)
   @UseGuards(JwtGuard)
-  async comment(@Req() req, @Param('commentId') commentId: string) {
-    await this.commentService.delete(req.user.id, commentId);
+  async comment(@Req() req, @Param('comment_id') commentId: string) {
+    const commentInfo: DeleteCommentPostDto = { user_id: req.user.id, comment_id: commentId };
+    await this.commentService.delete(commentInfo);
   }
 }

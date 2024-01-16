@@ -1,5 +1,6 @@
 import { IsOptional, IsString } from 'class-validator';
 
+// Request Types - Fields Validation
 export class UserDataDto {
   @IsString()
   @IsOptional()

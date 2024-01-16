@@ -1,75 +1,89 @@
 import {
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
 } from '@nestjs/common';
 import { Pool } from 'pg';
+import { randomUUID } from 'crypto';
+import { PostgresError } from 'pg-error-enum';
 
 import { PG_CONNECTION } from 'src/db/db.module';
 import {
   CreateCommentPostDto,
-  CreateCommentPostType,
+  CreateCommentPostResponseDto,
+  DeleteCommentPostDto,
   GetCommentPostDto,
-  GetCommentPostType,
+  GetCommentPostResponseDto,
   UpdateCommentPostDto,
+  UpdateCommentPostResponseDto,
 } from './dto';
-import { randomUUID } from 'crypto';
-import { UpdatePostType } from 'src/post/dto';
 
 @Injectable()
 export class CommentService {
   constructor(@Inject(PG_CONNECTION) private readonly db: Pool) {}
 
-  async create(userId: string, commentBody: CreateCommentPostDto): Promise<CreateCommentPostType> {
+  async create(payload: CreateCommentPostDto): Promise<CreateCommentPostResponseDto> {
+    // Open a client connection from the pool
+    const client = await this.db.connect();
+    const { content, post_id: postId, user_id: userId } = payload;
+
     try {
       const query = `
         INSERT INTO post_comments(id, user_id, post_id, content)
         VALUES($1, $2, $3, $4)
         RETURNING id, content ;
       `;
-      const values = [randomUUID(), userId, commentBody.postId, commentBody.content];
+      const values = [randomUUID(), userId, postId, content];
 
-      const comment = await this.db.query<CreateCommentPostType>(query, values);
+      // Transaction
+      await client.query('BEGIN');
+      const comment = await client.query<CreateCommentPostResponseDto>(query, values);
+      client.query('UPDATE posts SET comments_count = comments_count + 1 WHERE id = $1', [postId]);
+      client.query('COMMIT');
+
       return comment.rows[0];
     } catch (err) {
       console.error(err);
-      if (err.code === '23503') {
-        throw new NotFoundException('user or post not found');
-      }
+
+      client.query('ROLLBACK');
+      if (err.code === PostgresError.FOREIGN_KEY_VIOLATION)
+        throw new HttpException('user or post not found', HttpStatus.NOT_FOUND);
+      if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
+    } finally {
+      client.release();
     }
   }
-  async get(userId: string, commentBody: GetCommentPostDto): Promise<GetCommentPostType> {
+
+  async get(payload: GetCommentPostDto): Promise<GetCommentPostResponseDto> {
+    const { user_id: userId, comment_id: commentId } = payload;
     try {
       const query = `
         SELECT * FROM post_comments
         WHERE user_id = $1 AND id = $2;
       `;
-      const values = [userId, commentBody.id];
+      const values = [userId, commentId];
 
-      const comment = await this.db.query<GetCommentPostType>(query, values);
-      if (comment.rows.length === 0) {
-        throw new NotFoundException();
-      }
+      const comment = await this.db.query<GetCommentPostResponseDto>(query, values);
+
+      if (comment.rows.length === 0)
+        throw new HttpException('comment not found', HttpStatus.NOT_FOUND);
+
       return comment.rows[0];
     } catch (err) {
       console.error(err);
-      if (err.code === '23503') {
-        throw new NotFoundException('user or post not found');
-      }
-      if (err instanceof NotFoundException) {
-        throw new NotFoundException('comment not found');
-      }
+
+      if (err.code === PostgresError.FOREIGN_KEY_VIOLATION)
+        throw new HttpException('user or post not found', HttpStatus.NOT_FOUND);
+      if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
   }
 
-  async update(
-    userId: string,
-    commentId: string,
-    commentBody: UpdateCommentPostDto,
-  ): Promise<UpdatePostType> {
+  async update(payload: UpdateCommentPostDto): Promise<UpdateCommentPostResponseDto> {
+    const { post_id: postId, comment_id: commentId, user_id: userId, content } = payload;
     try {
       const query = `
         UPDATE post_comments 
@@ -77,46 +91,59 @@ export class CommentService {
         WHERE user_id = $1 AND post_id = $2 AND id = $4
         RETURNING id, content ;
       `;
-      const values = [userId, commentBody.postId, commentBody.content, commentId];
+      const values = [userId, postId, content, commentId];
 
-      const comment = await this.db.query<UpdatePostType>(query, values);
-      if (comment.rows.length === 0) {
-        throw new NotFoundException();
-      }
+      const comment = await this.db.query<UpdateCommentPostResponseDto>(query, values);
+
+      if (comment.rows.length === 0)
+        throw new HttpException('comment not found', HttpStatus.NOT_FOUND);
+
       return comment.rows[0];
     } catch (err) {
       console.error(err);
-      if (err.code === '23503') {
-        throw new NotFoundException('user or post not found');
-      }
-      if (err instanceof NotFoundException) {
-        throw new NotFoundException('comment not found');
-      }
+
+      if (err.code === PostgresError.FOREIGN_KEY_VIOLATION)
+        throw new HttpException('user or post not found', HttpStatus.NOT_FOUND);
+      if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
   }
-  async delete(userId: string, commentId: string): Promise<void> {
+
+  async delete(payload: DeleteCommentPostDto): Promise<void> {
+    // Open a client connection from the pool
+    const client = await this.db.connect();
+    const { comment_id: commentId, user_id: userId } = payload;
+
     try {
       const query = `
         DELETE FROM post_comments
         WHERE user_id = $1 AND id = $2
-        RETURNING id
+        RETURNING id , post_id
       `;
       const values = [userId, commentId];
 
-      const comment = await this.db.query(query, values);
-      if (comment.rowCount === 0) {
-        throw new NotFoundException();
-      }
+      // Transaction
+      await client.query('BEGIN');
+      const comment = await client.query(query, values);
+
+      if (comment.rowCount === 0)
+        throw new HttpException('comment not found', HttpStatus.NOT_FOUND);
+
+      await client.query('UPDATE posts SET comments_count = comments_count - 1 WHERE id = $1 ', [
+        comment.rows[0]['post_id'],
+      ]);
+      client.query('COMMIT');
     } catch (err) {
       console.error(err);
-      if (err.code === '23503') {
-        throw new NotFoundException('user or post not found');
-      }
-      if (err instanceof NotFoundException) {
-        throw new NotFoundException('comment not found');
-      }
+
+      client.query('ROLLBACK');
+
+      if (err.code === PostgresError.FOREIGN_KEY_VIOLATION)
+        throw new HttpException('user or post not found', HttpStatus.NOT_FOUND);
+      if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
+    } finally {
+      client.release();
     }
   }
 }

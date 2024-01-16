@@ -10,8 +10,9 @@ export class LikeController {
 
   @Post('/')
   @UseGuards(JwtGuard)
-  async follow(@Req() req, @Body() likeBody: CreateLikePostDto) {
-    const liked = await this.likeService.like(req.user.id, likeBody);
+  async follow(@Req() req, @Body() payload: CreateLikePostDto) {
+    payload.user_id = req.user.id;
+    const liked = await this.likeService.like(payload);
     return { statusCode: 201, ...liked };
   }
 

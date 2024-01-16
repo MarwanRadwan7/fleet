@@ -1,6 +1,11 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class DeleteCommentPostDto {
   @IsNotEmpty()
-  commentId: string;
+  @IsString()
+  comment_id: string;
+
+  @IsNotEmpty()
+  @IsString()
+  user_id: string;
 }

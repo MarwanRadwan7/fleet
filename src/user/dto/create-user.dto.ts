@@ -1,4 +1,5 @@
 import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
+
 import { User } from '../user.interface';
 
 export class CreateUserDto {
@@ -27,7 +28,7 @@ export class CreateUserDto {
   birthDate: string;
 }
 
-export type CreateUserType = Pick<
+export type CreateUserResponseDto = Pick<
   User,
   'id' | 'username' | 'name' | 'email' | 'phone' | 'birthDate' | 'avatar' | 'bio'
 >;

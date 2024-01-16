@@ -1,9 +1,11 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateLikePostDto {
+  user_id: string;
+
   @IsNotEmpty()
   @IsString()
-  postId: string;
+  post_id: string;
 }
 
-export type CreateLikePostType = { liked: boolean };
+export type CreateLikePostResponseDto = { liked: boolean };
