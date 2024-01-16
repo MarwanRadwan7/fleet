@@ -2,15 +2,11 @@ import { IsDecimal, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 import { Post } from '../post.interface';
 
+// Request Types - Fields Validation
 export class UpdatePostDto {
   @IsString()
   @IsNotEmpty()
-  // @Max(250)
   content: string;
-
-  @IsString()
-  @IsOptional()
-  hashtags: string;
 
   @IsString()
   @IsOptional()
@@ -23,6 +19,10 @@ export class UpdatePostDto {
   @IsDecimal()
   @IsOptional()
   lng: number;
+
+  user_id: string;
+  post_id: string;
 }
 
-export interface UpdatePostType extends Post {}
+// Response Types
+export interface UpdatePostResponseDto extends Post {}

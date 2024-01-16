@@ -24,10 +24,6 @@ export class CreatePostDto {
 
   @IsString()
   @IsOptional()
-  hashtags: string;
-
-  @IsString()
-  @IsOptional()
   tags: string;
 
   @IsDecimal()
@@ -39,4 +35,4 @@ export class CreatePostDto {
   lng: number;
 }
 
-export interface CreatePostType extends Post {}
+export type CreatePostResponseDto = Post;
