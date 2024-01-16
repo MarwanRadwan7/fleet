@@ -1,13 +1,13 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
-import { CloudinaryProvider } from 'src/cloudinary/cloudinary.provider';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
-import { PostService } from 'src/post/post.service';
+import { PostModule } from 'src/post/post.module';
 
 @Module({
-  imports: [CloudinaryModule],
+  imports: [CloudinaryModule, forwardRef(() => PostModule)],
   controllers: [UserController],
-  providers: [UserService, PostService, CloudinaryProvider],
+  providers: [UserService],
+  exports: [UserService],
 })
 export class UserModule {}

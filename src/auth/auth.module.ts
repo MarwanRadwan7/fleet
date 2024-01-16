@@ -6,7 +6,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { UserModule } from 'src/user/user.module';
 import { AuthController } from './auth.controller';
-import { UserService } from 'src/user/user.service';
 import { RefreshJwtStrategy, LocalStrategy, JwtStrategy } from './strategy';
 
 @Module({
@@ -22,7 +21,7 @@ import { RefreshJwtStrategy, LocalStrategy, JwtStrategy } from './strategy';
       inject: [ConfigService], // Inject ConfigService for the factory
     }),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, RefreshJwtStrategy, UserService],
+  providers: [AuthService, LocalStrategy, JwtStrategy, RefreshJwtStrategy],
   controllers: [AuthController],
 })
 export class AuthModule {}
