@@ -2,7 +2,7 @@ import { Body, Controller, Req, UseGuards, Post, Delete, HttpCode, Param } from 
 
 import { JwtGuard } from 'src/auth/guard';
 import { FollowService } from './follow.service';
-import { CreateFollowDto } from './dto';
+import { CreateFollowDto, DeleteFollowDto } from './dto';
 
 @Controller('follow')
 export class FollowController {
@@ -14,10 +14,12 @@ export class FollowController {
     await this.followService.follow(req.user.id, followBody);
     return { statusCode: 201, message: 'user followed successfully' };
   }
-  @Delete('/:friendId')
+
+  @Delete('/:user_id')
   @UseGuards(JwtGuard)
   @HttpCode(204)
-  async unFollow(@Req() req, @Param('friendId') friendId: string) {
-    await this.followService.unFollow(req.user.id, friendId);
+  async unFollow(@Req() req, @Param('user_id') followingId: string) {
+    const payload: DeleteFollowDto = { user_id: req.user.id, following_id: followingId };
+    await this.followService.unFollow(payload);
   }
 }

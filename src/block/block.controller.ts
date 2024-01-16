@@ -10,14 +10,16 @@ export class BlockController {
 
   @Post('/')
   @UseGuards(JwtGuard)
-  async follow(@Req() req, @Body() blockBody: CreateBlockDto) {
-    await this.blockService.block(req.user.id, blockBody);
+  async block(@Req() req, @Body() blocked_id: string) {
+    const payload: CreateBlockDto = { user_id: req.user.id, blocked_id };
+    await this.blockService.block(payload);
     return { statusCode: 201, message: 'user blocked successfully' };
   }
-  @Delete('/:friendId')
+
+  @Delete('/:friend_id')
   @UseGuards(JwtGuard)
   @HttpCode(204)
-  async unFollow(@Req() req, @Param('friendId') friendId: string) {
-    await this.blockService.unBlock(req.user.id, friendId);
+  async unBlock(@Req() req, @Param('friend_id') friend_id: string) {
+    await this.blockService.unBlock(req.user.id, friend_id);
   }
 }

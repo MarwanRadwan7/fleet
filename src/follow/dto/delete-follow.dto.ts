@@ -1,11 +1,11 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateBlockDto {
+export class DeleteFollowDto {
   @IsNotEmpty()
   @IsString()
   user_id: string;
 
   @IsNotEmpty()
   @IsString()
-  blocked_id: string;
+  following_id: string;
 }

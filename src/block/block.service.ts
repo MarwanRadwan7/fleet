@@ -1,6 +1,6 @@
 import {
-  ConflictException,
-  ForbiddenException,
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Pool } from 'pg';
 import { randomUUID } from 'crypto';
+import { PostgresError } from 'pg-error-enum';
 
 import { PG_CONNECTION } from 'src/db/db.module';
 import { CreateBlockDto } from './dto';
@@ -31,12 +32,13 @@ export class BlockService {
     return result.rows[0].exists;
   }
 
-  async block(userId: string, blockBody: CreateBlockDto): Promise<void> {
+  async block(payload: CreateBlockDto): Promise<void> {
     try {
-      const friendId = blockBody.friendId;
-      if (userId === friendId) {
-        throw new ForbiddenException();
-      }
+      const friendId = payload.blocked_id;
+      const userId = payload.user_id;
+
+      if (userId === friendId)
+        throw new HttpException('you cannot block yourself', HttpStatus.BAD_REQUEST);
 
       const existingFollow = await this.db.query(
         'SELECT id FROM follows WHERE user_id = $1 AND friend_id = $2',
@@ -55,27 +57,22 @@ export class BlockService {
         userId,
         friendId,
       ]);
-
     } catch (err) {
       console.error(err);
-      if (err.code === '23505') {
-        throw new ConflictException('user is already blocked');
-      }
-      if (err.code === '23503') {
-        throw new NotFoundException('user not found');
-      }
-      if (err instanceof ForbiddenException) {
-        throw new ForbiddenException('you cannot block yourself');
-      }
+
+      if (err instanceof HttpException) throw err;
+      if (err.code === PostgresError.UNIQUE_VIOLATION)
+        throw new HttpException('user is already blocked', HttpStatus.CONFLICT);
+      if (err.code === PostgresError.FOREIGN_KEY_VIOLATION)
+        throw new HttpException('user not found', HttpStatus.NOT_FOUND);
       throw new InternalServerErrorException();
     }
   }
 
   async unBlock(userId: string, friendId: string): Promise<void> {
     try {
-      if (userId === friendId) {
-        throw new ForbiddenException();
-      }
+      if (userId === friendId)
+        throw new HttpException('you cannot unblock yourself', HttpStatus.BAD_REQUEST);
 
       const query = `
         DELETE FROM blocks
@@ -85,12 +82,10 @@ export class BlockService {
       await this.db.query(query, [userId, friendId]);
     } catch (err) {
       console.error(err);
-      if (err.code === '23503') {
+
+      if (err instanceof HttpException) throw err;
+      if (err.code === PostgresError.FOREIGN_KEY_VIOLATION)
         throw new NotFoundException('user not found');
-      }
-      if (err instanceof ForbiddenException) {
-        throw new ForbiddenException('you cannot unblock yourself');
-      }
       throw new InternalServerErrorException();
     }
   }
