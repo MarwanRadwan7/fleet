@@ -13,12 +13,14 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 import { PostService } from './post.service';
 import { JwtGuard } from 'src/auth/guard';
 import { ParsePipe, SharpTransformPipe } from 'src/common/pipe';
 import { UserDataDto } from 'src/user/dto/data-user.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { Pagination, PaginationParams } from 'src/common/decorator/pagination';
 import {
   CreatePostDto,
   CreatePostResponseDto,
@@ -28,9 +30,9 @@ import {
   GetPostResponseDto,
   UpdatePostDto,
 } from './dto';
-import { Pagination, PaginationParams } from 'src/common/decorator/pagination';
 
 @Controller('posts')
+@UseGuards(ThrottlerGuard)
 export class PostController {
   constructor(
     private readonly postService: PostService,

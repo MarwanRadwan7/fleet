@@ -30,8 +30,10 @@ import {
   UpdateUserResponseDto,
 } from './dto';
 import { Pagination, PaginationParams } from 'src/common/decorator/pagination/';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Controller('users')
+@UseGuards(ThrottlerGuard)
 export class UserController {
   constructor(
     private readonly userService: UserService,
