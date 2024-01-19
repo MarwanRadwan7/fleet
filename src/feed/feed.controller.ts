@@ -5,6 +5,7 @@ import { JwtGuard } from 'src/auth/guard';
 import { PostService } from 'src/post/post.service';
 import { GetFeedResponseDto, GetTopFeedResponseDto } from './dto';
 import { GetPostsByHashtagsResponseDto } from 'src/post/dto';
+import { Pagination, PaginationParams } from 'src/common/decorator/pagination';
 
 @Controller('feed')
 export class FeedController {
@@ -15,10 +16,10 @@ export class FeedController {
 
   @Get('/')
   @UseGuards(JwtGuard)
-  async feed(@Req() req) {
+  async feed(@PaginationParams() paginationParams: Pagination, @Req() req) {
     const userId = req.user.id;
-    const posts: GetFeedResponseDto[] = await this.feedService.feed(userId);
-    return { statusCode: 200, message: 'feed retrieved successfully', data: { posts } };
+    const posts: GetFeedResponseDto = await this.feedService.feed(userId, paginationParams);
+    return { statusCode: 200, message: 'feed retrieved successfully', data: { ...posts } };
   }
 
   @Get('/top')
@@ -28,14 +29,17 @@ export class FeedController {
   }
 
   @Get('/hashtags')
-  async postsByHashtags(@Query() hashtags: { hashtags: string[] }) {
-    let posts: GetPostsByHashtagsResponseDto[];
+  async postsByHashtags(
+    @PaginationParams() paginationParams: Pagination,
+    @Query() hashtags: { hashtags: string[] },
+  ) {
+    let posts: GetPostsByHashtagsResponseDto;
     if (Array.isArray(hashtags.hashtags)) {
-      posts = await this.postService.getPostsByHashtags(hashtags.hashtags);
+      posts = await this.postService.getPostsByHashtags(hashtags.hashtags, paginationParams);
     } else {
       const hashes = Array(hashtags.hashtags);
-      posts = await this.postService.getPostsByHashtags(hashes);
+      posts = await this.postService.getPostsByHashtags(hashes, paginationParams);
     }
-    return { statusCode: 200, message: 'feed retrieved successfully', data: { posts } };
+    return { statusCode: 200, message: 'feed retrieved successfully', data: { ...posts } };
   }
 }

@@ -10,6 +10,8 @@ import { Pool } from 'pg';
 
 import { PG_CONNECTION } from 'src/db/db.module';
 import { UserDataDto } from 'src/user/dto/data-user.dto';
+import { UserService } from 'src/user/user.service';
+import { Pagination } from 'src/common/decorator/pagination';
 import {
   CreatePostDto,
   CreatePostResponseDto,
@@ -18,15 +20,38 @@ import {
   GetPostLikesResponseDto,
   GetPostResponseDto,
   GetPostsByUserDto,
-  GetPostsByUserResponseDto,
   UpdatePostDto,
   UpdatePostResponseDto,
   GetPostsByHashtagsResponseDto,
+  GetPostsByUserResponseDto,
 } from './dto';
 
 @Injectable()
 export class PostService {
-  constructor(@Inject(PG_CONNECTION) private readonly db: Pool) {}
+  constructor(
+    private readonly userService: UserService,
+    @Inject(PG_CONNECTION) private readonly db: Pool,
+  ) {}
+
+  async isExist(postId: string): Promise<boolean> {
+    try {
+      const query = `
+        SELECT id
+        FROM posts 
+        WHERE posts.id = $1
+      `;
+
+      const post = await this.db.query(query, [postId]);
+
+      if (post.rowCount === 0) return false;
+
+      return true;
+    } catch (err) {
+      console.error(err);
+
+      throw new InternalServerErrorException();
+    }
+  }
 
   async create(userData: UserDataDto, payload: CreatePostDto): Promise<CreatePostResponseDto> {
     try {
@@ -59,9 +84,11 @@ export class PostService {
     const { post_id: postId, user_id: userId } = payload;
 
     try {
+      const isExist = await this.isExist(postId);
+      if (!isExist) throw new HttpException('post not found', HttpStatus.NOT_FOUND);
+
       delete payload.post_id;
       delete payload.user_id;
-
       payload['updated_at'] = new Date().toISOString();
       payload['edited'] = true;
 
@@ -76,8 +103,6 @@ export class PostService {
       `;
 
       const post = await this.db.query<UpdatePostResponseDto>(query, values);
-
-      if (post.rows.length === 0) throw new HttpException('post not found', HttpStatus.NOT_FOUND);
 
       return post.rows[0];
     } catch (err) {
@@ -98,7 +123,7 @@ export class PostService {
 
       const post = await this.db.query<GetPostResponseDto>(query, [postId]);
 
-      if (post.rows.length === 0) throw new HttpException('post not found', HttpStatus.NOT_FOUND);
+      if (post.rowCount === 0) throw new HttpException('post not found', HttpStatus.NOT_FOUND);
 
       return post.rows[0];
     } catch (err) {
@@ -111,14 +136,15 @@ export class PostService {
 
   async delete(postId: string): Promise<void> {
     try {
+      const isExist = await this.isExist(postId);
+      if (!isExist) throw new HttpException('post not found', HttpStatus.NOT_FOUND);
+
       const query = `
         DELETE FROM posts
         WHERE id = $1;
       `;
 
-      const post = await this.db.query(query, [postId]);
-
-      if (post.rowCount === 0) throw new HttpException('post not found', HttpStatus.NOT_FOUND);
+      await this.db.query(query, [postId]);
     } catch (err) {
       console.error(err);
       if (err instanceof HttpException) throw err;
@@ -126,20 +152,25 @@ export class PostService {
     }
   }
 
-  async getPostLikes(payload: GetPostDataDto): Promise<GetPostLikesResponseDto[]> {
+  // TODO: Cache
+
+  async getPostLikes(payload: GetPostDataDto, page: Pagination): Promise<GetPostLikesResponseDto> {
     try {
+      const isExist = await this.isExist(payload.post_id);
+      if (!isExist) throw new HttpException('post not found', HttpStatus.NOT_FOUND);
+
       const query = `
-      SELECT u.id AS user_id, u.username, u.name, u.avatar
-      FROM post_likes AS l
-      JOIN users AS u
-      ON u.id = l.user_id
-      WHERE l.post_id = $1;
-    `;
-      const post = await this.db.query<GetPostLikesResponseDto>(query, [payload.post_id]);
+        SELECT u.id AS user_id, u.username, u.name, u.avatar
+        FROM post_likes AS l
+        JOIN users AS u
+        ON u.id = l.user_id
+        WHERE l.post_id = $1
+        LIMIT $2
+        OFFSET $3;
+      `;
+      const likes = await this.db.query(query, [payload.post_id, page.limit, page.offset]);
 
-      if (post.rows.length === 0) throw new HttpException('post not found', HttpStatus.NOT_FOUND);
-
-      return post.rows;
+      return { count: likes.rowCount, likes: likes.rows };
     } catch (err) {
       console.error(err);
       if (err instanceof HttpException) throw err;
@@ -147,21 +178,28 @@ export class PostService {
     }
   }
 
-  async getPostComment(payload: GetPostDataDto): Promise<GetPostCommentsResponseDto[]> {
+  // TODO: Cache
+  async getPostComments(
+    payload: GetPostDataDto,
+    page: Pagination,
+  ): Promise<GetPostCommentsResponseDto> {
     try {
+      const isExist = await this.isExist(payload.post_id);
+      if (!isExist) throw new HttpException('post not found', HttpStatus.NOT_FOUND);
+
       const query = `
-      SELECT u.id AS user_id, u.username AS comment_id, u.name, u.avatar, c.content, c.created_at, c.updated_at
-      FROM post_comments AS c
-      JOIN users AS u
-      ON u.id = c.user_id
-      WHERE c.post_id = $1;
-    `;
+        SELECT u.id AS user_id, u.username AS comment_id, u.name, u.avatar, c.content, c.created_at, c.updated_at
+        FROM post_comments AS c
+        JOIN users AS u
+        ON u.id = c.user_id
+        WHERE c.post_id = $1
+        LIMIT $2
+        OFFSET $3;
+      `;
 
-      const post = await this.db.query<GetPostCommentsResponseDto>(query, [payload.post_id]);
+      const comments = await this.db.query(query, [payload.post_id, page.limit, page.offset]);
 
-      if (post.rows.length === 0) throw new HttpException('post not found', HttpStatus.NOT_FOUND);
-
-      return post.rows;
+      return { count: comments.rowCount, comments: comments.rows };
     } catch (err) {
       console.error(err);
       if (err instanceof HttpException) throw err;
@@ -169,18 +207,24 @@ export class PostService {
     }
   }
 
-  async getPostByUser(payload: GetPostsByUserDto): Promise<GetPostsByUserResponseDto[]> {
+  async getPostsByUser(
+    payload: GetPostsByUserDto,
+    page: Pagination,
+  ): Promise<GetPostsByUserResponseDto> {
     try {
+      const user = await this.userService.isExist(payload.user_id);
+      if (!user) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+
       const query = `
       SELECT p.id, p.slug, p.content, p.media_url, p.hashtags, p.lat, p.lng, p.edited, p.created_at
       FROM posts AS p
-      WHERE p.user_id = $1 ;
+      WHERE p.user_id = $1
+      LIMIT $2
+      OFFSET $3;
     `;
-      const post = await this.db.query<GetPostsByUserResponseDto>(query, [payload.user_id]);
+      const posts = await this.db.query(query, [payload.user_id, page.limit, page.offset]);
 
-      if (post.rows.length === 0) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
-
-      return post.rows;
+      return { count: posts.rowCount, posts: posts.rows };
     } catch (err) {
       console.error(err);
       if (err instanceof HttpException) throw err;
@@ -188,19 +232,24 @@ export class PostService {
     }
   }
 
-  async getPostsByHashtags(hashtags: string[]): Promise<GetPostsByHashtagsResponseDto[]> {
+  async getPostsByHashtags(
+    hashtags: string[],
+    page: Pagination,
+  ): Promise<GetPostsByHashtagsResponseDto> {
     try {
       const hashtagsRegEX = hashtags.map(el => `%${el}%`);
 
       const query = `
         SELECT *
         FROM posts
-        WHERE ${hashtagsRegEX.map((_tag, index) => `hashtags LIKE $${index + 1}`).join(' OR ')}
+        WHERE ${hashtagsRegEX.map((_tag, index) => `hashtags LIKE $${index + 3}`).join(' OR ')}
+        LIMIT $1
+        OFFSET $2;
       `;
 
-      const posts = await this.db.query<GetPostsByHashtagsResponseDto>(query, hashtagsRegEX);
+      const posts = await this.db.query(query, [page.limit, page.offset, ...hashtagsRegEX]);
 
-      return posts.rows;
+      return { count: posts.rowCount, posts: posts.rows };
     } catch (err) {
       console.error(err);
 

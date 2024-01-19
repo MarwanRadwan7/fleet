@@ -10,7 +10,6 @@ import { hash } from 'bcryptjs';
 import { randomUUID } from 'crypto';
 import { PostgresError } from 'pg-error-enum';
 
-import { PG_CONNECTION } from 'src/db/db.module';
 import {
   CreateUserDto,
   CreateUserResponseDto,
@@ -22,10 +21,32 @@ import {
   UpdateUserDto,
   UpdateUserResponseDto,
 } from './dto';
+import { PG_CONNECTION } from 'src/db/db.module';
+import { Pagination } from 'src/common/decorator/pagination';
 
 @Injectable()
 export class UserService {
   constructor(@Inject(PG_CONNECTION) private readonly db: Pool) {}
+
+  async isExist(userId: string): Promise<boolean> {
+    try {
+      const user = await this.db.query(
+        `
+          SELECT id
+          FROM users 
+          WHERE id = $1;
+        `,
+        [userId],
+      );
+
+      if (user.rowCount === 0) return false;
+
+      return true;
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException();
+    }
+  }
 
   async create(user: CreateUserDto): Promise<CreateUserResponseDto> {
     try {
@@ -62,6 +83,9 @@ export class UserService {
 
   async update(userId: string, payload: UpdateUserDto): Promise<UpdateUserResponseDto> {
     try {
+      const isExist = await this.isExist(userId);
+      if (!isExist) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+
       // Encrypt if user updated password
       if (payload.password) {
         payload.password = await hash(payload.password, 12);
@@ -85,18 +109,15 @@ export class UserService {
 
       const user = await this.db.query<UpdateUserResponseDto>(query, values);
 
-      if (user.rows.length === 0) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
-
       return user.rows[0];
     } catch (err) {
       console.error(err);
-
       if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
   }
 
-  async get(payload: GetUserDataDto): Promise<GetUserResponseDto> {
+  async getById(userId: string): Promise<GetUserResponseDto> {
     try {
       const user = await this.db.query<GetUserResponseDto>(
         `
@@ -104,10 +125,10 @@ export class UserService {
           FROM users 
           WHERE id = $1;
         `,
-        [payload.user_id],
+        [userId],
       );
 
-      if (user.rows.length === 0) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+      if (user.rowCount === 0) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
       return user.rows[0];
     } catch (err) {
@@ -129,7 +150,7 @@ export class UserService {
         [username],
       );
 
-      if (user.rows.length === 0) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+      if (user.rowCount === 0) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
       return user.rows[0];
     } catch (err) {
@@ -139,22 +160,28 @@ export class UserService {
     }
   }
 
-  async getUserFollowers(payload: GetUserDataDto): Promise<GetUserFollowersResponseDto[]> {
+  async getUserFollowers(
+    payload: GetUserDataDto,
+    page: Pagination,
+  ): Promise<GetUserFollowersResponseDto> {
     try {
-      const user = await this.db.query<GetUserFollowersResponseDto>(
+      const isExist = await this.isExist(payload.user_id);
+      if (!isExist) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+
+      const users = await this.db.query(
         `
           SELECT u.id AS user_id, u.username, u.name, u.avatar
           FROM followers AS f
           LEFT JOIN users AS u
           ON u.id = f.follower_id
-          WHERE f.user_id = $1;
+          WHERE f.user_id = $1
+          LIMIT $2
+          OFFSET $3;
         `,
-        [payload.user_id],
+        [payload.user_id, page.limit, page.offset],
       );
 
-      if (user.rows.length === 0) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
-
-      return user.rows;
+      return { count: users.rowCount, followers: users.rows };
     } catch (err) {
       console.error(err);
       if (err instanceof HttpException) throw err;
@@ -162,22 +189,28 @@ export class UserService {
     }
   }
 
-  async getUserFollowings(payload: GetUserDataDto): Promise<GetUserFollowingsResponseDto[]> {
+  async getUserFollowings(
+    payload: GetUserDataDto,
+    page: Pagination,
+  ): Promise<GetUserFollowingsResponseDto> {
     try {
-      const user = await this.db.query<GetUserFollowingsResponseDto>(
+      const isExist = await this.isExist(payload.user_id);
+      if (!isExist) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+
+      const users = await this.db.query(
         `
           SELECT u.id AS user_id, u.username, u.name, u.avatar
           FROM followings AS f
           LEFT JOIN users AS u
           ON u.id = f.following_id
-          WHERE f.user_id = $1;
+          WHERE f.user_id = $1
+          LIMIT $2
+          OFFSET $3;
         `,
-        [payload.user_id],
+        [payload.user_id, page.limit, page.offset],
       );
 
-      if (user.rows.length === 0) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
-
-      return user.rows;
+      return { count: users.rowCount, followings: users.rows };
     } catch (err) {
       console.error(err);
       if (err instanceof HttpException) throw err;
@@ -187,7 +220,10 @@ export class UserService {
 
   async delete(payload: GetUserDataDto): Promise<void> {
     try {
-      const user = await this.db.query(
+      const isExist = await this.isExist(payload.user_id);
+      if (!isExist) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+
+      await this.db.query(
         `
         UPDATE users
         SET is_active = false , updated_at = $2
@@ -196,8 +232,6 @@ export class UserService {
       `,
         [payload.user_id, new Date().toISOString()],
       );
-
-      if (user.rows.length === 0) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
       return;
     } catch (err) {

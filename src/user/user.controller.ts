@@ -29,6 +29,7 @@ import {
   UpdateUserDto,
   UpdateUserResponseDto,
 } from './dto';
+import { Pagination, PaginationParams } from 'src/common/decorator/pagination/';
 
 @Controller('users')
 export class UserController {
@@ -65,35 +66,51 @@ export class UserController {
   @Get('/:user_id')
   @UseGuards(JwtGuard)
   async get(@Param('user_id') user_id: string) {
-    const payload: GetUserDataDto = { user_id };
-    const user: GetUserResponseDto = await this.userService.get(payload);
+    const user: GetUserResponseDto = await this.userService.getById(user_id);
     return { statusCode: 200, message: 'user retrieved successfully', data: { user } };
   }
 
   @Get('/:user_id/followers')
   @UseGuards(JwtGuard)
-  async getUserFollowers(@Param('user_id') user_id: string) {
+  async getUserFollowers(
+    @PaginationParams() paginationParams: Pagination,
+    @Param('user_id') user_id: string,
+  ) {
     const payload: GetUserDataDto = { user_id };
-    const followers: GetUserFollowersResponseDto[] =
-      await this.userService.getUserFollowers(payload);
-    return { statusCode: 200, message: 'followers retrieved successfully', data: { followers } };
+    const followers: GetUserFollowersResponseDto = await this.userService.getUserFollowers(
+      payload,
+      paginationParams,
+    );
+    return { statusCode: 200, message: 'followers retrieved successfully', data: { ...followers } };
   }
 
   @Get('/:user_id/followings')
   @UseGuards(JwtGuard)
-  async getUserFollowings(@Param('user_id') user_id: string) {
+  async getUserFollowings(
+    @PaginationParams() paginationParams: Pagination,
+    @Param('user_id') user_id: string,
+  ) {
     const payload: GetUserDataDto = { user_id };
-    const followings: GetUserFollowingsResponseDto[] =
-      await this.userService.getUserFollowings(payload);
-    return { statusCode: 200, message: 'followings retrieved successfully', data: { followings } };
+    const followings: GetUserFollowingsResponseDto = await this.userService.getUserFollowings(
+      payload,
+      paginationParams,
+    );
+    return {
+      statusCode: 200,
+      message: 'followings retrieved successfully',
+      data: { ...followings },
+    };
   }
 
   @Get('/:user_id/posts')
   @UseGuards(JwtGuard)
-  async getUserPosts(@Param('user_id') user_id: string) {
+  async getUserPosts(
+    @PaginationParams() paginationParams: Pagination,
+    @Param('user_id') user_id: string,
+  ) {
     const payload: GetPostsByUserDto = { user_id };
-    const posts = await this.postService.getPostByUser(payload);
-    return { statusCode: 200, message: 'posts retrieved successfully', data: { posts } };
+    const posts = await this.postService.getPostsByUser(payload, paginationParams);
+    return { statusCode: 200, message: 'posts retrieved successfully', data: { ...posts } };
   }
 
   @Delete('/:user_id')

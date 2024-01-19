@@ -28,6 +28,7 @@ import {
   GetPostResponseDto,
   UpdatePostDto,
 } from './dto';
+import { Pagination, PaginationParams } from 'src/common/decorator/pagination';
 
 @Controller('posts')
 export class PostController {
@@ -77,18 +78,30 @@ export class PostController {
 
   @Get('/:post_id/likes')
   @UseGuards(JwtGuard)
-  async getPostLikes(@Param('post_id') postId: string) {
+  async getPostLikes(
+    @PaginationParams() paginationParams: Pagination,
+    @Param('post_id') postId: string,
+  ) {
     const payload: GetPostDataDto = { post_id: postId };
-    const likes: GetPostLikesResponseDto[] = await this.postService.getPostLikes(payload);
-    return { statusCode: 200, message: 'likes retrieved successfully', data: { likes } };
+    const likes: GetPostLikesResponseDto = await this.postService.getPostLikes(
+      payload,
+      paginationParams,
+    );
+    return { statusCode: 200, message: 'likes retrieved successfully', data: { ...likes } };
   }
 
   @Get('/:post_id/comments')
   @UseGuards(JwtGuard)
-  async getPostComments(@Param('post_id') postId: string) {
+  async getPostComments(
+    @PaginationParams() paginationParams: Pagination,
+    @Param('post_id') postId: string,
+  ) {
     const payload: GetPostDataDto = { post_id: postId };
-    const comments: GetPostCommentsResponseDto[] = await this.postService.getPostComment(payload);
-    return { statusCode: 200, message: 'comments retrieved successfully', data: { comments } };
+    const comments: GetPostCommentsResponseDto = await this.postService.getPostComments(
+      payload,
+      paginationParams,
+    );
+    return { statusCode: 200, message: 'comments retrieved successfully', data: { ...comments } };
   }
 
   @Delete('/:post_id')

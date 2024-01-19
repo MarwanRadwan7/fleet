@@ -9,9 +9,13 @@ export class GetUserDataDto {
 }
 
 // Response Types
-export type GetUserFollowersResponseDto = Pick<User, 'id' | 'username' | 'name' | 'avatar'>;
+export type GetUserFollowersResponseDto = { count: number } & {
+  followers: Pick<User, 'id' | 'username' | 'name' | 'avatar'>[];
+};
 
-export type GetUserFollowingsResponseDto = Pick<User, 'id' | 'username' | 'name' | 'avatar'>;
+export type GetUserFollowingsResponseDto = { count: number } & {
+  followings: Pick<User, 'id' | 'username' | 'name' | 'avatar'>[];
+};
 
 export type GetUserLikesResponseDto = Pick<User, 'id' | 'username' | 'name' | 'avatar'>;
 

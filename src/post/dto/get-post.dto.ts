@@ -21,9 +21,15 @@ export type GetPostResponseDto = Post & {
   likes_count: number;
   comments_count: number;
 };
-export type GetPostLikesResponseDto = Pick<User, 'id' | 'username' | 'name' | 'avatar'>;
+export type GetPostLikesResponseDto = { count: number } & {
+  likes: Pick<User, 'id' | 'username' | 'name' | 'avatar'>[];
+};
 
-export type GetPostCommentsResponseDto = Pick<User, 'id' | 'username' | 'name' | 'avatar'> &
-  Pick<Comment, 'content' | 'createdAt' | 'updatedAt'>;
+export type GetPostCommentsResponseDto = { count: number } & {
+  comments: Pick<User, 'id' | 'username' | 'name' | 'avatar'>[] &
+    Pick<Comment, 'content' | 'createdAt' | 'updatedAt'>[];
+};
 
-export type GetPostsByUserResponseDto = Omit<Post, 'media_thumbnail' | 'updatedAt' | 'userId'>;
+export type GetPostsByUserResponseDto = {
+  count: number;
+} & { posts: Omit<Post, 'media_thumbnail' | 'updatedAt' | 'userId'>[] };

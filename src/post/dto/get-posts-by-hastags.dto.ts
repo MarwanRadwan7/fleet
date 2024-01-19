@@ -1,3 +1,3 @@
 import { Post } from '../post.interface';
 
-export type GetPostsByHashtagsResponseDto = Post;
+export type GetPostsByHashtagsResponseDto = { count: number; posts: Post[] };
