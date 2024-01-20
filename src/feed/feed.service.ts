@@ -32,6 +32,7 @@ export class FeedService {
           u.avatar AS user_avatar,
           p.id AS post_id,
           p.content AS post_content,
+          p.slug AS posT_slug,
           p.media_url AS post_media_url,
           p.created_at AS post_created_at
         FROM
@@ -48,9 +49,9 @@ export class FeedService {
         OFFSET $3;
       `;
 
-      const posts = await this.db.query(query, [userId, page.limit, page.offset]);
+      const feed = await this.db.query(query, [userId, page.limit, page.offset]);
 
-      return { count: posts.rowCount, posts: posts.rows };
+      return { count: feed.rowCount, posts: feed.rows };
     } catch (err) {
       console.error(err);
 

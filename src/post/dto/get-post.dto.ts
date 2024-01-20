@@ -152,5 +152,5 @@ export class GetPostsByUserResponseDtoExample {
     lng: string;
     edited: string;
     created_at: Date;
-  };
+  }[];
 }
