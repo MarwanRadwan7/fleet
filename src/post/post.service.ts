@@ -55,6 +55,9 @@ export class PostService {
 
   async create(userData: UserDataDto, payload: CreatePostDto): Promise<CreatePostResponseDto> {
     try {
+      const user = await this.userService.isExist(userData.user_id);
+      if (!user) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+
       const postId = randomUUID();
       const slug = randomInt(1e12);
       const hashtags = payload['content']
@@ -80,20 +83,21 @@ export class PostService {
     }
   }
 
-  async update(payload: UpdatePostDto): Promise<UpdatePostResponseDto> {
-    const { post_id: postId, user_id: userId } = payload;
-
+  async update(
+    postId: string,
+    userId: string,
+    payload: UpdatePostDto,
+  ): Promise<UpdatePostResponseDto> {
     try {
+      // FIXME:
       const isExist = await this.isExist(postId);
       if (!isExist) throw new HttpException('post not found', HttpStatus.NOT_FOUND);
 
-      delete payload.post_id;
-      delete payload.user_id;
       payload['updated_at'] = new Date().toISOString();
       payload['edited'] = true;
 
       const fields = Object.keys(payload);
-      const values = [postId, userId, ...Object.values(payload)];
+      const values = Object.values(payload);
 
       const query = `
         UPDATE posts
@@ -102,7 +106,7 @@ export class PostService {
         RETURNING *;
       `;
 
-      const post = await this.db.query<UpdatePostResponseDto>(query, values);
+      const post = await this.db.query<UpdatePostResponseDto>(query, [postId, userId, ...values]);
 
       return post.rows[0];
     } catch (err) {

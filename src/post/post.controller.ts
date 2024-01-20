@@ -13,6 +13,19 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
 import { PostService } from './post.service';
@@ -24,14 +37,19 @@ import { Pagination, PaginationParams } from 'src/common/decorator/pagination';
 import {
   CreatePostDto,
   CreatePostResponseDto,
+  CreatePostResponseDtoExample,
   GetPostCommentsResponseDto,
   GetPostDataDto,
   GetPostLikesResponseDto,
+  GetPostLikesResponseDtoExample,
   GetPostResponseDto,
+  GetPostResponseDtoExample,
   UpdatePostDto,
+  UpdatePostResponseDtoExample,
 } from './dto';
 
 @Controller('posts')
+@ApiTags('Posts')
 @UseGuards(ThrottlerGuard)
 export class PostController {
   constructor(
@@ -42,6 +60,20 @@ export class PostController {
   @Post('/')
   @UseGuards(JwtGuard)
   @UseInterceptors(FileInterceptor('media'))
+  @ApiSecurity('JWT-auth')
+  @ApiOperation({ summary: 'Creates a new post' })
+  @ApiCreatedResponse({
+    description: 'post created successfully',
+    type: CreatePostResponseDtoExample,
+  })
+  @ApiNotFoundResponse({ description: 'user not found' })
+  @ApiUnauthorizedResponse({ description: 'unauthorized' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    required: true,
+    type: CreatePostDto,
+  })
   async create(
     @Req() req,
     @UploadedFile(ParsePipe, SharpTransformPipe)
@@ -65,14 +97,31 @@ export class PostController {
 
   @Patch('/:post_id')
   @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
+  @ApiOperation({ summary: 'Updates an existing post' })
+  @ApiOkResponse({ description: 'post updated successfully', type: UpdatePostResponseDtoExample })
+  @ApiNotFoundResponse({ description: 'post not found' })
+  @ApiUnauthorizedResponse({ description: 'unauthorized' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiBody({
+    required: true,
+    type: UpdatePostDto,
+  })
   async update(@Req() req, @Param('post_id') postId: string, @Body() postBody: UpdatePostDto) {
-    const payload: UpdatePostDto = { user_id: req.user.id, post_id: postId, ...postBody };
-    const post = await this.postService.update(payload);
+    const payload: UpdatePostDto = { ...postBody };
+    const post = await this.postService.update(postId, req.user.id, payload);
+
     return { statusCode: 200, message: 'post updated successfully', data: { post } };
   }
 
   @Get('/:post_id')
   @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
+  @ApiOperation({ summary: 'Gets an existing post' })
+  @ApiOkResponse({ description: 'post retrieved successfully', type: GetPostResponseDtoExample })
+  @ApiNotFoundResponse({ description: 'post not found' })
+  @ApiUnauthorizedResponse({ description: 'unauthorized' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async getById(@Req() req, @Param('post_id') postId: string) {
     const post: GetPostResponseDto = await this.postService.getById(postId);
     return { statusCode: 200, message: 'post retrieved successfully', data: { post } };
@@ -80,6 +129,15 @@ export class PostController {
 
   @Get('/:post_id/likes')
   @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
+  @ApiOperation({ summary: 'Gets likes info on an existing post' })
+  @ApiOkResponse({
+    description: 'likes retrieved successfully',
+    type: GetPostLikesResponseDtoExample,
+  })
+  @ApiNotFoundResponse({ description: 'post not found' })
+  @ApiUnauthorizedResponse({ description: 'unauthorized' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async getPostLikes(
     @PaginationParams() paginationParams: Pagination,
     @Param('post_id') postId: string,
@@ -94,6 +152,15 @@ export class PostController {
 
   @Get('/:post_id/comments')
   @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
+  @ApiOperation({ summary: 'Gets comments info on an existing post' })
+  @ApiOkResponse({
+    description: 'comments retrieved successfully',
+    type: GetPostLikesResponseDtoExample,
+  })
+  @ApiNotFoundResponse({ description: 'post not found' })
+  @ApiUnauthorizedResponse({ description: 'unauthorized' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async getPostComments(
     @PaginationParams() paginationParams: Pagination,
     @Param('post_id') postId: string,
@@ -108,6 +175,12 @@ export class PostController {
 
   @Delete('/:post_id')
   @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
+  @ApiOperation({ summary: 'Deletes an existing post' })
+  @ApiNoContentResponse({ description: 'post deleted successfully' })
+  @ApiNotFoundResponse({ description: 'post not found' })
+  @ApiUnauthorizedResponse({ description: 'unauthorized' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   @HttpCode(204)
   async delete(@Param('post_id') postId: string) {
     await this.postService.delete(postId);
