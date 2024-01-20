@@ -16,22 +16,47 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { JwtGuard } from 'src/auth/guard';
 import { ParsePipe, SharpTransformPipe } from 'src/common/pipe';
+import {
+  ApiBody,
+  ApiConflictResponse,
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { ThrottlerGuard } from '@nestjs/throttler';
+
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { GetPostsByUserDto } from 'src/post/dto';
+import {
+  GetPostsByUserDto,
+  GetPostsByUserResponseDto,
+  GetPostsByUserResponseDtoExample,
+} from 'src/post/dto';
 import { PostService } from 'src/post/post.service';
 import {
   CreateUserDto,
   CreateUserResponseDto,
+  CreateUserResponseExample,
   GetUserDataDto,
   GetUserFollowersResponseDto,
+  GetUserFollowersResponseDtoExample,
   GetUserFollowingsResponseDto,
+  GetUserFollowingsResponseDtoExample,
   GetUserResponseDto,
+  GetUserResponseDtoExample,
   UpdateUserDto,
   UpdateUserResponseDto,
+  UpdateUserResponseDtoExample,
 } from './dto';
 import { Pagination, PaginationParams } from 'src/common/decorator/pagination/';
-import { ThrottlerGuard } from '@nestjs/throttler';
 
+@ApiTags('User')
 @Controller('users')
 @UseGuards(ThrottlerGuard)
 export class UserController {
@@ -42,6 +67,16 @@ export class UserController {
   ) {}
 
   @Post('/')
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiCreatedResponse({ description: 'user created successfully', type: CreateUserResponseExample })
+  @ApiConflictResponse({ description: 'email or username address already registered' })
+  @ApiUnauthorizedResponse({ description: 'unauthorized' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    required: true,
+    type: CreateUserDto,
+  })
   @UseInterceptors(FileInterceptor('avatar'))
   async register(
     @UploadedFile(ParsePipe, SharpTransformPipe)
@@ -60,6 +95,16 @@ export class UserController {
 
   @Patch('/:user_id')
   @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
+  @ApiOperation({ summary: 'Updates an existing user' })
+  @ApiOkResponse({ description: 'user updated successfully', type: UpdateUserResponseDtoExample })
+  @ApiNotFoundResponse({ description: 'user not found' })
+  @ApiUnauthorizedResponse({ description: 'unauthorized' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiBody({
+    required: true,
+    type: UpdateUserDto,
+  })
   async update(@Param('user_id') user_id: string, @Body() payload: UpdateUserDto) {
     const user: UpdateUserResponseDto = await this.userService.update(user_id, payload);
     return { statusCode: 200, message: 'user updated successfully', data: { user } };
@@ -67,6 +112,15 @@ export class UserController {
 
   @Get('/:user_id')
   @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
+  @ApiOperation({ summary: 'Gets an existing user by ID' })
+  @ApiOkResponse({
+    description: 'user retrieved successfully',
+    type: GetUserResponseDtoExample,
+  })
+  @ApiUnauthorizedResponse({ description: 'unauthorized' })
+  @ApiNotFoundResponse({ description: 'user not found' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async get(@Param('user_id') user_id: string) {
     const user: GetUserResponseDto = await this.userService.getById(user_id);
     return { statusCode: 200, message: 'user retrieved successfully', data: { user } };
@@ -74,6 +128,15 @@ export class UserController {
 
   @Get('/:user_id/followers')
   @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
+  @ApiOperation({ summary: "Gets an existing user's followers" })
+  @ApiOkResponse({
+    description: 'followers retrieved successfully',
+    type: GetUserFollowersResponseDtoExample,
+  })
+  @ApiUnauthorizedResponse({ description: 'unauthorized' })
+  @ApiNotFoundResponse({ description: 'user not found' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async getUserFollowers(
     @PaginationParams() paginationParams: Pagination,
     @Param('user_id') user_id: string,
@@ -88,6 +151,15 @@ export class UserController {
 
   @Get('/:user_id/followings')
   @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
+  @ApiOperation({ summary: "Gets an existing user's followings" })
+  @ApiOkResponse({
+    description: 'followings retrieved successfully',
+    type: GetUserFollowingsResponseDtoExample,
+  })
+  @ApiUnauthorizedResponse({ description: 'unauthorized' })
+  @ApiNotFoundResponse({ description: 'user not found' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async getUserFollowings(
     @PaginationParams() paginationParams: Pagination,
     @Param('user_id') user_id: string,
@@ -106,15 +178,34 @@ export class UserController {
 
   @Get('/:user_id/posts')
   @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
+  @ApiOperation({ summary: "Gets an existing user 's posts" })
+  @ApiOkResponse({
+    description: 'posts retrieved successfully',
+    type: GetPostsByUserResponseDtoExample,
+  })
+  @ApiUnauthorizedResponse({ description: 'unauthorized' })
+  @ApiNotFoundResponse({ description: 'user not found' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async getUserPosts(
     @PaginationParams() paginationParams: Pagination,
     @Param('user_id') user_id: string,
   ) {
     const payload: GetPostsByUserDto = { user_id };
-    const posts = await this.postService.getPostsByUser(payload, paginationParams);
+    const posts: GetPostsByUserResponseDto = await this.postService.getPostsByUser(
+      payload,
+      paginationParams,
+    );
     return { statusCode: 200, message: 'posts retrieved successfully', data: { ...posts } };
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
+  @ApiOperation({ summary: "Deactivates an existing user 's account" })
+  @ApiNoContentResponse()
+  @ApiUnauthorizedResponse({ description: 'unauthorized' })
+  @ApiNotFoundResponse({ description: 'user not found' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   @Delete('/:user_id')
   @UseGuards(JwtGuard)
   @HttpCode(204)
