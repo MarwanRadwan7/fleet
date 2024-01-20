@@ -1,8 +1,8 @@
 import {
-  ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
@@ -23,32 +23,39 @@ export class AuthService {
       if (!user) return null;
 
       // Account is deactivated
-      if (!user['is_active']) throw new ForbiddenException('account is deactivated');
+      if (!user['is_active'])
+        throw new HttpException('account is deactivated', HttpStatus.FORBIDDEN);
+
+      if (!user) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
       const passwordValid = await bcrypt.compare(password, user.password);
-
-      if (!user) throw new NotFoundException('could not find the user');
 
       if (user && passwordValid) {
         delete user.password;
         return user;
       }
-      return null;
+
+      // Password is incorrect
+      throw new HttpException('invalid password', HttpStatus.UNAUTHORIZED);
     } catch (err) {
       console.error(err);
+      if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
   }
-  async login(user: LoginDto): Promise<LoginResponseDto> {
-    const payload = { id: user.id, sub: { username: user.username } };
+  async login(userId: string, user: LoginDto): Promise<LoginResponseDto> {
+    const payload = { id: userId, sub: { username: user.username } };
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      access_token: {
+        token: await this.jwtService.signAsync(payload),
+        expires_in: '1h',
+      },
       refresh_token: await this.jwtService.signAsync(payload, { expiresIn: '7d' }),
     };
   }
 
-  async refreshToken(user: LoginDto): Promise<RefreshTokenResponseDto> {
-    const payload = { id: user.id, sub: { username: user.username } };
+  async refreshToken(userId: string, user: LoginDto): Promise<RefreshTokenResponseDto> {
+    const payload = { id: userId, sub: { username: user.username } };
     return {
       access_token: await this.jwtService.signAsync(payload),
     };
