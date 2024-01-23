@@ -24,10 +24,13 @@ import {
 export class CommentService {
   constructor(@Inject(PG_CONNECTION) private readonly db: Pool) {}
 
-  async create(payload: CreateCommentPostDto): Promise<CreateCommentPostResponseDto> {
+  async create(
+    userId: string,
+    payload: CreateCommentPostDto,
+  ): Promise<CreateCommentPostResponseDto> {
     // Open a client connection from the pool
     const client = await this.db.connect();
-    const { content, post_id: postId, user_id: userId } = payload;
+    const { content, post_id: postId} = payload;
 
     try {
       const query = `
