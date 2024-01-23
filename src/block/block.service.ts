@@ -32,10 +32,9 @@ export class BlockService {
     return result.rows[0].exists;
   }
 
-  async block(payload: CreateBlockDto): Promise<void> {
+  async block(userId: string, payload: CreateBlockDto): Promise<void> {
     try {
       const friendId = payload.blocked_id;
-      const userId = payload.user_id;
 
       if (userId === friendId)
         throw new HttpException('you cannot block yourself', HttpStatus.BAD_REQUEST);

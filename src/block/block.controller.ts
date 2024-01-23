@@ -34,8 +34,8 @@ export class BlockController {
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   @ApiBody({ required: true, type: CreateBlockDto })
   async block(@Req() req, @Body() blocked_id: string) {
-    const payload: CreateBlockDto = { user_id: req.user.id, blocked_id };
-    await this.blockService.block(payload);
+    const payload: CreateBlockDto = { blocked_id };
+    await this.blockService.block(req.user.id, payload);
     return { statusCode: 201, message: 'user blocked successfully' };
   }
 
