@@ -15,9 +15,9 @@ import { PostgresError } from 'pg-error-enum';
 export class LikeService {
   constructor(@Inject(PG_CONNECTION) private readonly db: Pool) {}
 
-  async like(payload: CreateLikePostDto): Promise<CreateLikePostResponseDto> {
+  async like(userId: string, payload: CreateLikePostDto): Promise<CreateLikePostResponseDto> {
     const client = await this.db.connect();
-    const { post_id: postId, user_id: userId } = payload;
+    const { post_id: postId } = payload;
 
     try {
       // Transaction
