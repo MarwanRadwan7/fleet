@@ -31,21 +31,19 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import { PostService } from './post.service';
 import { JwtGuard } from 'src/auth/guard';
 import { ParsePipe, SharpTransformPipe } from 'src/common/pipe';
-import { UserDataDto } from 'src/user/dto/data-user.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { Pagination, PaginationParams } from 'src/common/decorator/pagination';
 import {
   CreatePostDto,
-  CreatePostResponseDto,
   CreatePostResponseDtoExample,
   GetPostCommentsResponseDto,
-  GetPostDataDto,
   GetPostLikesResponseDto,
   GetPostLikesResponseDtoExample,
-  GetPostResponseDto,
   GetPostResponseDtoExample,
   UpdatePostDto,
   UpdatePostResponseDtoExample,
+  PostDto,
+  GetPostCommentsResponseDtoExample,
 } from './dto';
 
 @Controller('posts')
@@ -81,15 +79,15 @@ export class PostController {
     @Body()
     payload: CreatePostDto,
   ) {
-    const userData: UserDataDto = { user_id: req.user.id, username: req.user.sub.username };
-    let post: CreatePostResponseDto;
-    payload['media_url'] = null;
+    const userId: string = req.user.id;
+    let post: PostDto;
+    payload.mediaUrl = null;
 
     if (media) {
-      payload['media_url'] = (await this.cloudinaryService.uploadFile(media)).secure_url;
-      post = await this.postService.create(userData, payload);
+      payload.mediaUrl = (await this.cloudinaryService.uploadFile(media)).secure_url;
+      post = await this.postService.create(userId, payload);
     } else {
-      post = await this.postService.create(userData, payload);
+      post = await this.postService.create(userId, payload);
     }
 
     return { statusCode: 201, message: 'post created successfully', data: { post } };
@@ -109,7 +107,7 @@ export class PostController {
   })
   async update(@Req() req, @Param('post_id') postId: string, @Body() postBody: UpdatePostDto) {
     const payload: UpdatePostDto = { ...postBody };
-    const post = await this.postService.update(postId, req.user.id, payload);
+    const post = await this.postService.update(postId, payload);
 
     return { statusCode: 200, message: 'post updated successfully', data: { post } };
   }
@@ -123,7 +121,7 @@ export class PostController {
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async getById(@Req() req, @Param('post_id') postId: string) {
-    const post: GetPostResponseDto = await this.postService.getById(postId);
+    const post: PostDto = await this.postService.getById(postId);
     return { statusCode: 200, message: 'post retrieved successfully', data: { post } };
   }
 
@@ -142,9 +140,8 @@ export class PostController {
     @PaginationParams() paginationParams: Pagination,
     @Param('post_id') postId: string,
   ) {
-    const payload: GetPostDataDto = { post_id: postId };
     const likes: GetPostLikesResponseDto = await this.postService.getPostLikes(
-      payload,
+      postId,
       paginationParams,
     );
     return { statusCode: 200, message: 'likes retrieved successfully', data: { ...likes } };
@@ -156,7 +153,7 @@ export class PostController {
   @ApiOperation({ summary: 'Gets comments info on an existing post' })
   @ApiOkResponse({
     description: 'comments retrieved successfully',
-    type: GetPostLikesResponseDtoExample,
+    type: GetPostCommentsResponseDtoExample,
   })
   @ApiNotFoundResponse({ description: 'post not found' })
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
@@ -165,9 +162,8 @@ export class PostController {
     @PaginationParams() paginationParams: Pagination,
     @Param('post_id') postId: string,
   ) {
-    const payload: GetPostDataDto = { post_id: postId };
     const comments: GetPostCommentsResponseDto = await this.postService.getPostComments(
-      payload,
+      postId,
       paginationParams,
     );
     return { statusCode: 200, message: 'comments retrieved successfully', data: { ...comments } };
