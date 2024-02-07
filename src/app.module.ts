@@ -5,7 +5,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
 
 import { UserModule } from './user/user.module';
-import { DbModule } from './db/db.module';
 import { AuthModule } from './auth/auth.module';
 import { PostModule } from './post/post.module';
 import { FollowModule } from './follow/follow.module';
@@ -33,7 +32,6 @@ import typeorm from './config/typeorm';
       useFactory: async (configService: ConfigService) => configService.get('typeorm'),
     }),
     UserModule,
-    DbModule,
     AuthModule,
     PostModule,
     FollowModule,

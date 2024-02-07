@@ -1,7 +1,7 @@
 import { registerAs } from '@nestjs/config';
 import { config as dotenvConfig } from 'dotenv';
 import { join } from 'path';
-import { DataSource, DataSourceOptions } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 
 dotenvConfig({ path: '.env' });
@@ -16,11 +16,15 @@ const config: PostgresConnectionOptions = {
   schema: 'public',
   entities: [join(__dirname, '..', '**', '*.entity.{ts,js}')],
   migrations: [join('dist/migrations/*.{ts,js}')],
-  synchronize: false,
+  synchronize: true,
   migrationsTableName: 'migrations_table',
   migrationsRun: true,
-  logging: true,
+  logging: false,
 };
 
 export default registerAs('typeorm', () => config);
-export const connectionSource = new DataSource(config as DataSourceOptions);
+export const connectionSource = new DataSource(config);
+connectionSource
+  .initialize()
+  .then(() => 'Database Connected')
+  .catch(err => console.error(`Error connecting the database ${err}`));
