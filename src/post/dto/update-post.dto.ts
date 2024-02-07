@@ -1,13 +1,11 @@
-import { IsDecimal, IsOptional, IsString } from 'class-validator';
-
-import { Post } from '../post.interface';
+import { IsDecimal, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 // Request Types - Fields Validation
 export class UpdatePostDto {
   @ApiProperty({ example: 'example', description: 'content of the post', required: false })
   @IsString()
-  // @IsNotEmpty()
+  @IsNotEmpty()
   content: string;
 
   @ApiProperty({ example: 'example', description: 'mentions on the post', required: false })
@@ -22,7 +20,7 @@ export class UpdatePostDto {
   })
   @IsDecimal()
   @IsOptional()
-  lat: number;
+  lat: string;
 
   @ApiProperty({
     example: 90,
@@ -31,46 +29,43 @@ export class UpdatePostDto {
   })
   @IsDecimal()
   @IsOptional()
-  lng: number;
+  lng: string;
 }
 
 // Response Types
-export interface UpdatePostResponseDto extends Post {}
 export class UpdatePostResponseDtoExample {
   @ApiProperty({
     example: {
       id: 'beed05c9-0610-468a-9ddd-2fd84821fea5',
-      user_id: '6fcb4875-c4dc-4c8f-b15f-06f9fd8c18e8',
+      userId: '6fcb4875-c4dc-4c8f-b15f-06f9fd8c18e8',
       slug: '276653500474',
       content: 'example',
-      media_url: null,
-      media_thumbnail: null,
+      mediaUrl: null,
       hashtags: 'life,pets',
       tags: '',
       lat: 90,
       lng: 90,
-      edited: false,
+      isEdited: true,
       created_at: '2024-01-01T20:38:01.872Z',
-      updated_at: '2024-01-01T20:38:01.872Z',
-      likes_count: 0,
-      comments_count: 0,
+      updatedAt: '2024-01-01T20:38:01.872Z',
+      likesCount: 0,
+      commentsCount: 0,
     },
   })
   post: {
     id: string;
-    user_id: string;
+    userId: string;
     slug: string;
     content: string;
-    media_url: string;
-    media_thumbnail: string;
+    mediaUrl: string;
     hashtags: string;
     tags: string;
     lat: number;
     lng: number;
-    edited: boolean;
+    isEdited: boolean;
     created_at: Date;
-    updated_at: Date;
-    likes_count: number;
-    comments_count: number;
+    updatedAt: Date;
+    likesCount: number;
+    commentsCount: number;
   };
 }

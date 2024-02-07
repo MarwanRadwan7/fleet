@@ -10,12 +10,8 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-
-import { UserService } from './user.service';
-import { JwtGuard } from 'src/auth/guard';
-import { ParsePipe, SharpTransformPipe } from 'src/common/pipe';
 import {
   ApiBody,
   ApiConflictResponse,
@@ -30,29 +26,27 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
+import { UserService } from './user.service';
+import { JwtGuard } from 'src/auth/guard';
+import { ParsePipe, SharpTransformPipe } from 'src/common/pipe';
+
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import {
-  GetPostsByUserDto,
-  GetPostsByUserResponseDto,
-  GetPostsByUserResponseDtoExample,
-} from 'src/post/dto';
+import { GetPostsByUserResponseDto, GetPostsByUserResponseDtoExample } from 'src/post/dto';
 import { PostService } from 'src/post/post.service';
 import {
   CreateUserDto,
-  CreateUserResponseDto,
   CreateUserResponseExample,
-  GetUserDataDto,
   GetUserFollowersResponseDto,
   GetUserFollowersResponseDtoExample,
   GetUserFollowingsResponseDto,
   GetUserFollowingsResponseDtoExample,
-  GetUserResponseDto,
   GetUserResponseDtoExample,
   UpdateUserDto,
-  UpdateUserResponseDto,
   UpdateUserResponseDtoExample,
+  UserDto,
 } from './dto';
 import { Pagination, PaginationParams } from 'src/common/decorator/pagination/';
 
@@ -78,23 +72,25 @@ export class UserController {
     type: CreateUserDto,
   })
   @UseInterceptors(FileInterceptor('avatar'))
+  @UseInterceptors(ClassSerializerInterceptor)
   async register(
     @UploadedFile(ParsePipe, SharpTransformPipe)
     avatar: Express.Multer.File,
     @Body() payload: CreateUserDto,
   ) {
-    let user: CreateUserResponseDto;
+    let user: UserDto;
     if (avatar) {
       payload['avatar'] = (await this.cloudinaryService.uploadFile(avatar)).secure_url;
-      user = await this.userService.create(payload);
+      user = await this.userService.register(payload);
     } else {
-      user = await this.userService.create(payload);
+      user = await this.userService.register(payload);
     }
     return { statusCode: 201, message: 'user created successfully', data: { user } };
   }
 
   @Patch('/:user_id')
   @UseGuards(JwtGuard)
+  // @UseInterceptors(ClassSerializerInterceptor)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: 'Updates an existing user' })
   @ApiOkResponse({ description: 'user updated successfully', type: UpdateUserResponseDtoExample })
@@ -105,13 +101,14 @@ export class UserController {
     required: true,
     type: UpdateUserDto,
   })
-  async update(@Param('user_id') user_id: string, @Body() payload: UpdateUserDto) {
-    const user: UpdateUserResponseDto = await this.userService.update(user_id, payload);
+  async update(@Param('user_id') userId: string, @Body() payload: UpdateUserDto) {
+    const user: any = await this.userService.update(userId, payload);
     return { statusCode: 200, message: 'user updated successfully', data: { user } };
   }
 
   @Get('/:user_id')
   @UseGuards(JwtGuard)
+  // @UseInterceptors(ClassSerializerInterceptor)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: 'Gets an existing user by ID' })
   @ApiOkResponse({
@@ -122,7 +119,7 @@ export class UserController {
   @ApiNotFoundResponse({ description: 'user not found' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async get(@Param('user_id') user_id: string) {
-    const user: GetUserResponseDto = await this.userService.getById(user_id);
+    const user: UserDto = await this.userService.getById(user_id);
     return { statusCode: 200, message: 'user retrieved successfully', data: { user } };
   }
 
@@ -139,11 +136,10 @@ export class UserController {
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async getUserFollowers(
     @PaginationParams() paginationParams: Pagination,
-    @Param('user_id') user_id: string,
+    @Param('user_id') userId: string,
   ) {
-    const payload: GetUserDataDto = { user_id };
     const followers: GetUserFollowersResponseDto = await this.userService.getUserFollowers(
-      payload,
+      userId,
       paginationParams,
     );
     return { statusCode: 200, message: 'followers retrieved successfully', data: { ...followers } };
@@ -162,11 +158,10 @@ export class UserController {
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async getUserFollowings(
     @PaginationParams() paginationParams: Pagination,
-    @Param('user_id') user_id: string,
+    @Param('user_id') userId: string,
   ) {
-    const payload: GetUserDataDto = { user_id };
     const followings: GetUserFollowingsResponseDto = await this.userService.getUserFollowings(
-      payload,
+      userId,
       paginationParams,
     );
     return {
@@ -189,11 +184,10 @@ export class UserController {
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async getUserPosts(
     @PaginationParams() paginationParams: Pagination,
-    @Param('user_id') user_id: string,
+    @Param('user_id') userId: string,
   ) {
-    const payload: GetPostsByUserDto = { user_id };
     const posts: GetPostsByUserResponseDto = await this.postService.getPostsByUser(
-      payload,
+      userId,
       paginationParams,
     );
     return { statusCode: 200, message: 'posts retrieved successfully', data: { ...posts } };
@@ -209,8 +203,7 @@ export class UserController {
   @Delete('/:user_id')
   @UseGuards(JwtGuard)
   @HttpCode(204)
-  async delete(@Param('user_id') user_id: string) {
-    const payload: GetUserDataDto = { user_id };
-    await this.userService.delete(payload);
+  async delete(@Param('user_id') userId: string) {
+    await this.userService.deactivate(userId);
   }
 }

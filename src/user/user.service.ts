@@ -1,115 +1,63 @@
 import {
   HttpException,
   HttpStatus,
-  Inject,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Pool } from 'pg';
-import { hash } from 'bcryptjs';
-import { randomUUID } from 'crypto';
+import { hash } from 'argon2';
 import { PostgresError } from 'pg-error-enum';
 
 import {
   CreateUserDto,
-  CreateUserResponseDto,
-  GetUserByUsernameResponseDto,
-  GetUserDataDto,
   GetUserFollowersResponseDto,
   GetUserFollowingsResponseDto,
-  GetUserResponseDto,
   UpdateUserDto,
-  UpdateUserResponseDto,
+  UserDto,
 } from './dto';
-import { PG_CONNECTION } from 'src/db/db.module';
 import { Pagination } from 'src/common/decorator/pagination';
+import { UserRepository } from './user.repository';
+import { FollowRepository } from 'src/follow/follow.repository';
+import { IUserService } from './contract';
 
 @Injectable()
-export class UserService {
-  constructor(@Inject(PG_CONNECTION) private readonly db: Pool) {}
+export class UserService implements IUserService {
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly followRepository: FollowRepository,
+  ) {}
 
-  async isExist(userId: string): Promise<boolean> {
+  async register(user: CreateUserDto): Promise<UserDto> {
     try {
-      const user = await this.db.query(
-        `
-          SELECT id
-          FROM users 
-          WHERE id = $1;
-        `,
-        [userId],
-      );
-
-      if (user.rowCount === 0) return false;
-
-      return true;
+      const res = await this.userRepository.create(user);
+      return res;
     } catch (err) {
       console.error(err);
-      throw new InternalServerErrorException();
-    }
-  }
-
-  async create(user: CreateUserDto): Promise<CreateUserResponseDto> {
-    try {
-      const hashedPassword = await hash(user.password, 12);
-      const res = await this.db.query<CreateUserResponseDto>(
-        `
-        INSERT INTO users(id, username, name, email, phone, password, birth_date, avatar)
-        VALUES($1, $2, $3, $4, $5, $6, $7, $8) 
-        RETURNING id, username, name, email, phone, birth_date, avatar, bio;
-      `,
-        [
-          randomUUID(),
-          user.username,
-          user.name,
-          user.email,
-          user.phone,
-          hashedPassword,
-          user.birthDate,
-          user.avatar,
-        ],
-      );
-      return res.rows[0];
-    } catch (err) {
-      console.error(err);
-
       if (err.code === PostgresError.UNIQUE_VIOLATION)
         throw new HttpException(
           'email or username address already registered',
           HttpStatus.CONFLICT,
         );
+      if (err.code === PostgresError.NOT_NULL_VIOLATION)
+        throw new HttpException('some fields are required', HttpStatus.BAD_REQUEST);
       throw new InternalServerErrorException();
     }
   }
 
-  async update(userId: string, payload: UpdateUserDto): Promise<UpdateUserResponseDto> {
+  async update(userId: string, payload: UpdateUserDto): Promise<UserDto> {
     try {
-      const isExist = await this.isExist(userId);
+      const isExist = await this.userRepository.isExist(userId);
       if (!isExist) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
       // Encrypt if user updated password
       if (payload.password) {
-        payload.password = await hash(payload.password, 12);
+        payload.password = await hash(payload.password);
       }
-      // BirthDate type annotation
-      if (payload.birthDate) {
-        payload['birth_date'] = payload.birthDate;
-        delete payload.birthDate;
-      }
-      payload['updated_at'] = new Date().toISOString();
 
-      const fields = Object.keys(payload);
-      const values = [userId, ...Object.values(payload)];
+      payload['updatedAt'] = new Date().toISOString();
 
-      const query = `
-        UPDATE users
-        SET ${fields.map((field, index) => `${field} = $${index + 2}`).join(', ')}
-        WHERE id = $1
-        RETURNING id, username, name, email, phone, birth_date, avatar;
-      `;
+      const user = await this.userRepository.update(userId, payload);
 
-      const user = await this.db.query<UpdateUserResponseDto>(query, values);
-
-      return user.rows[0];
+      return user;
     } catch (err) {
       console.error(err);
       if (err instanceof HttpException) throw err;
@@ -117,71 +65,14 @@ export class UserService {
     }
   }
 
-  async getById(userId: string): Promise<GetUserResponseDto> {
+  async getById(userId: string): Promise<UserDto> {
     try {
-      const user = await this.db.query<GetUserResponseDto>(
-        `
-          SELECT id, username, name, email, phone, birth_date, avatar, bio
-          FROM users 
-          WHERE id = $1;
-        `,
-        [userId],
-      );
-
-      if (user.rowCount === 0) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
-
-      return user.rows[0];
-    } catch (err) {
-      console.error(err);
-      if (err instanceof HttpException) throw err;
-      throw new InternalServerErrorException();
-    }
-  }
-
-  // getByUsername used in auth service to retrieve user auth info
-  async getByUsername(username: string): Promise<GetUserByUsernameResponseDto> {
-    try {
-      const user = await this.db.query<GetUserByUsernameResponseDto>(
-        `
-          SELECT id, username, name, email, password, is_active
-          FROM users 
-          WHERE username = $1;
-        `,
-        [username],
-      );
-
-      if (user.rowCount === 0) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
-
-      return user.rows[0];
-    } catch (err) {
-      console.error(err);
-      if (err instanceof HttpException) throw err;
-      throw new InternalServerErrorException();
-    }
-  }
-
-  async getUserFollowers(
-    payload: GetUserDataDto,
-    page: Pagination,
-  ): Promise<GetUserFollowersResponseDto> {
-    try {
-      const isExist = await this.isExist(payload.user_id);
+      const isExist = await this.userRepository.isExist(userId);
       if (!isExist) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
-      const users = await this.db.query(
-        `
-          SELECT u.id AS user_id, u.username, u.name, u.avatar
-          FROM followers AS f
-          LEFT JOIN users AS u
-          ON u.id = f.follower_id
-          WHERE f.user_id = $1
-          LIMIT $2
-          OFFSET $3;
-        `,
-        [payload.user_id, page.limit, page.offset],
-      );
+      const user = await this.userRepository.findById(userId);
 
-      return { count: users.rowCount, followers: users.rows };
+      return user;
     } catch (err) {
       console.error(err);
       if (err instanceof HttpException) throw err;
@@ -189,28 +80,14 @@ export class UserService {
     }
   }
 
-  async getUserFollowings(
-    payload: GetUserDataDto,
-    page: Pagination,
-  ): Promise<GetUserFollowingsResponseDto> {
+  async getUserFollowers(userId: string, page: Pagination): Promise<GetUserFollowersResponseDto> {
     try {
-      const isExist = await this.isExist(payload.user_id);
+      const isExist = await this.userRepository.isExist(userId);
       if (!isExist) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
-      const users = await this.db.query(
-        `
-          SELECT u.id AS user_id, u.username, u.name, u.avatar
-          FROM followings AS f
-          LEFT JOIN users AS u
-          ON u.id = f.following_id
-          WHERE f.user_id = $1
-          LIMIT $2
-          OFFSET $3;
-        `,
-        [payload.user_id, page.limit, page.offset],
-      );
+      const users = await this.followRepository.getUserFollowers(userId, page);
 
-      return { count: users.rowCount, followings: users.rows };
+      return { count: users.length, followers: users };
     } catch (err) {
       console.error(err);
       if (err instanceof HttpException) throw err;
@@ -218,20 +95,27 @@ export class UserService {
     }
   }
 
-  async delete(payload: GetUserDataDto): Promise<void> {
+  async getUserFollowings(userId: string, page: Pagination): Promise<GetUserFollowingsResponseDto> {
     try {
-      const isExist = await this.isExist(payload.user_id);
+      const isExist = await this.userRepository.isExist(userId);
       if (!isExist) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
-      await this.db.query(
-        `
-        UPDATE users
-        SET is_active = false , updated_at = $2
-        WHERE id = $1
-        RETURNING id;
-      `,
-        [payload.user_id, new Date().toISOString()],
-      );
+      const users = await this.followRepository.getUserFollowings(userId, page);
+
+      return { count: users.length, followings: users };
+    } catch (err) {
+      console.error(err);
+      if (err instanceof HttpException) throw err;
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async deactivate(userId: string): Promise<void> {
+    try {
+      const isExist = await this.userRepository.isExist(userId);
+      if (!isExist) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+
+      await this.userRepository.deactivate(userId);
 
       return;
     } catch (err) {

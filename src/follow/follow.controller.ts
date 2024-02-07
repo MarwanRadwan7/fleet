@@ -55,7 +55,8 @@ export class FollowController {
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async unFollow(@Req() req, @Param('user_id') followingId: string) {
-    const payload: DeleteFollowDto = { user_id: req.user.id, following_id: followingId };
-    await this.followService.unFollow(payload);
+    const userId = req.user.id;
+    const payload: DeleteFollowDto = { followingId };
+    await this.followService.unFollow(userId, payload);
   }
 }

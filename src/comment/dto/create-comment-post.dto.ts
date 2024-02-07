@@ -5,7 +5,7 @@ export class CreateCommentPostDto {
   @ApiProperty({ example: 'cc0dee72-7d82-4310-bdd9-b9babb141f87' })
   @IsNotEmpty()
   @IsString()
-  post_id: string;
+  postId: string;
 
   @ApiProperty({ example: 'example' })
   @IsNotEmpty()
@@ -13,10 +13,25 @@ export class CreateCommentPostDto {
   content: string;
 }
 
-export class CreateCommentPostResponseDto { 
-  @ApiProperty({example: 'cc0dee72-7d82-4310-bdd9'})
-  id: string; 
+export class CreateCommentPostResponseDtoExample {
+  @ApiProperty({ example: 'cc0dee72-7d82-4310-bdd9' })
+  id: string;
 
   @ApiProperty({ example: 'example' })
-  comment: string 
-};
+  content: string;
+
+  @ApiProperty({ example: 'db11d4ca-c320-444f-afee-142c198a4d6d' })
+  userId: string;
+
+  @ApiProperty({ example: 'db11d4ca-c320-444f-afee-142c198a4d6d' })
+  postId: string;
+
+  @ApiProperty({ example: false })
+  isEdited: boolean;
+
+  @ApiProperty({ example: '2024-02-06T18:44:13.264Z' })
+  createdAt: Date;
+
+  @ApiProperty({ example: '2024-02-06T18:44:13.264Z' })
+  updatedAt: Date;
+}

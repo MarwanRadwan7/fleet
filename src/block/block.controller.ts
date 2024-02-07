@@ -33,8 +33,7 @@ export class BlockController {
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   @ApiBody({ required: true, type: CreateBlockDto })
-  async block(@Req() req, @Body() blocked_id: string) {
-    const payload: CreateBlockDto = { blocked_id };
+  async block(@Req() req, @Body() payload: CreateBlockDto) {
     await this.blockService.block(req.user.id, payload);
     return { statusCode: 201, message: 'user blocked successfully' };
   }
@@ -49,7 +48,7 @@ export class BlockController {
   @ApiNotFoundResponse({ description: 'user not found' })
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
-  async unBlock(@Req() req, @Param('friend_id') friend_id: string) {
-    await this.blockService.unBlock(req.user.id, friend_id);
+  async unBlock(@Req() req, @Param('friend_id') friendId: string) {
+    await this.blockService.unBlock(req.user.id, friendId);
   }
 }

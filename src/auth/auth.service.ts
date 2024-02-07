@@ -5,30 +5,29 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcryptjs';
+import { verify } from 'argon2';
 
-import { UserService } from 'src/user/user.service';
 import { LoginResponseDto, RefreshTokenResponseDto, LoginDto } from './dto';
+import { UserRepository } from 'src/user/user.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
+    private readonly userRepository: UserRepository,
     private jwtService: JwtService,
   ) {}
   async validateUser(username: string, password: string): Promise<any> {
     try {
-      const user = await this.userService.getByUsername(username);
+      const user = await this.userRepository.findByUsername(username);
 
       if (!user) return null;
 
       // Account is deactivated
-      if (!user['is_active'])
-        throw new HttpException('account is deactivated', HttpStatus.FORBIDDEN);
+      if (!user.isActive) throw new HttpException('account is deactivated', HttpStatus.FORBIDDEN);
 
       if (!user) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
-      const passwordValid = await bcrypt.compare(password, user.password);
+      const passwordValid = await verify(user.password, password);
 
       if (user && passwordValid) {
         delete user.password;
@@ -43,6 +42,7 @@ export class AuthService {
       throw new InternalServerErrorException();
     }
   }
+
   async login(userId: string, user: LoginDto): Promise<LoginResponseDto> {
     const payload = { id: userId, sub: { username: user.username } };
     return {
