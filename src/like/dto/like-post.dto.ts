@@ -5,7 +5,7 @@ export class CreateLikePostDto {
   @ApiProperty({ example: '0a9fb16e-47d9-4757-b635-d19207da2ee6' })
   @IsNotEmpty()
   @IsString()
-  post_id: string;
+  postId: string;
 }
 
 export type CreateLikePostResponseDto = { liked: boolean };
