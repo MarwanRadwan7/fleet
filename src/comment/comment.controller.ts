@@ -27,12 +27,10 @@ import { CommentService } from './comment.service';
 import { JwtGuard } from 'src/auth/guard';
 import {
   CreateCommentPostDto,
-  CreateCommentPostResponseDto,
-  DeleteCommentPostDto,
-  GetCommentPostDto,
-  GetCommentPostResponseDto,
+  CreateCommentPostResponseDtoExample,
+  GetCommentPostResponseDtoExample,
   UpdateCommentPostDto,
-  UpdateCommentPostResponseDto,
+  UpdateCommentPostResponseDtoExample,
 } from './dto';
 
 @Controller('comments')
@@ -46,7 +44,7 @@ export class CommentController {
   @ApiOperation({ summary: 'Creates a comment on a post' })
   @ApiCreatedResponse({
     description: 'comment created successfully',
-    type: CreateCommentPostResponseDto,
+    type: CreateCommentPostResponseDtoExample,
   })
   @ApiNotFoundResponse({ description: 'post not fount' })
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
@@ -66,7 +64,7 @@ export class CommentController {
   @ApiOperation({ summary: 'Updates a comment on a post' })
   @ApiOkResponse({
     description: 'comment updated successfully',
-    type: UpdateCommentPostResponseDto,
+    type: UpdateCommentPostResponseDtoExample,
   })
   @ApiNotFoundResponse({ description: 'post not fount' })
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
@@ -80,9 +78,7 @@ export class CommentController {
     @Param('comment_id') commentId: string,
     @Body() payload: UpdateCommentPostDto,
   ) {
-    payload.user_id = req.user.id;
-    payload.comment_id = commentId;
-    const comment = await this.commentService.update(payload);
+    const comment = await this.commentService.update(commentId, payload);
     return { statusCode: 200, message: 'comment updated successfully', data: comment };
   }
 
@@ -92,18 +88,13 @@ export class CommentController {
   @ApiOperation({ summary: 'Gets a comment on a post' })
   @ApiOkResponse({
     description: 'comment retrieved successfully',
-    type: GetCommentPostResponseDto,
+    type: GetCommentPostResponseDtoExample,
   })
   @ApiNotFoundResponse({ description: 'post not fount' })
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
-  @ApiBody({
-    required: true,
-    type: GetCommentPostDto,
-  })
   async get(@Req() req, @Param('comment_id') commentId: string) {
-    const commentInfo: GetCommentPostDto = { user_id: req.user.id, comment_id: commentId };
-    const comment = await this.commentService.get(commentInfo);
+    const comment = await this.commentService.get(commentId);
     return { statusCode: 200, message: 'comment retrieved successfully', data: comment };
   }
 
@@ -117,7 +108,6 @@ export class CommentController {
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async comment(@Req() req, @Param('comment_id') commentId: string) {
-    const commentInfo: DeleteCommentPostDto = { user_id: req.user.id, comment_id: commentId };
-    await this.commentService.delete(commentInfo);
+    await this.commentService.delete(commentId);
   }
 }

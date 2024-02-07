@@ -5,32 +5,28 @@ export class GetCommentPostDto {
   @ApiProperty({ example: '0a9fb16e-47d9-4757-b635-d19207da2ee6' })
   @IsNotEmpty()
   @IsString()
-  comment_id: string;
-
-  @ApiProperty({ example: '6fcb4875-c4dc-4c8f-b15f-06f9fd8c18e8' })
-  @IsString()
-  user_id: string;
+  commentId: string;
 }
 
-export class GetCommentPostResponseDto {
-  @ApiProperty({ example: '0a9fb16e-47d9-4757-b635-d19207da2ee6' })
+export class GetCommentPostResponseDtoExample {
+  @ApiProperty({ example: 'cc0dee72-7d82-4310-bdd9' })
   id: string;
-
-  @ApiProperty({ example: '6fcb4875-c4dc-4c8f-b15f-06f9fd8c18e8' })
-  user_id: string;
-
-  @ApiProperty({ example: '9b4c2140-ce38-4e0c-95c5-972009922dc' })
-  postId: string;
 
   @ApiProperty({ example: 'example' })
   content: string;
 
-  @ApiProperty({ example: true })
-  edited: boolean;
+  @ApiProperty({ example: 'db11d4ca-c320-444f-afee-142c198a4d6d' })
+  userId: string;
 
-  @ApiProperty({ example: '2024-01-16T12:04:49.437Z' })
+  @ApiProperty({ example: 'db11d4ca-c320-444f-afee-142c198a4d6d' })
+  postId: string;
+
+  @ApiProperty({ example: false })
+  isEdited: boolean;
+
+  @ApiProperty({ example: '2024-02-06T18:44:13.264Z' })
   createdAt: Date;
 
-  @ApiProperty({ example: '2024-01-16T12:04:49.437Z' })
+  @ApiProperty({ example: '2024-02-06T18:44:13.264Z' })
   updatedAt: Date;
 }
