@@ -1,61 +1,42 @@
 import {
   HttpException,
   HttpStatus,
-  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Pool } from 'pg';
-import { randomUUID } from 'crypto';
 import { PostgresError } from 'pg-error-enum';
 
-import { PG_CONNECTION } from 'src/db/db.module';
 import { CreateBlockDto } from './dto';
+import { BlockRepository } from './block.repository';
+import { FollowRepository } from 'src/follow/follow.repository';
+import { IBlockService } from './contract';
 
 @Injectable()
-export class BlockService {
-  constructor(@Inject(PG_CONNECTION) private readonly db: Pool) {}
-
-  async isBlocked(userId: string, friendId: string): Promise<boolean> {
-    const query = `
-        SELECT EXISTS (
-          SELECT 1 FROM blocks
-          WHERE 
-          (user_id = $1 AND friend_id = $2)
-          OR
-          (user_id = $2 AND friend_id = $1)
-        )
-      `;
-
-    const result = await this.db.query(query, [userId, friendId]);
-    return result.rows[0].exists;
-  }
+export class BlockService implements IBlockService {
+  constructor(
+    private readonly followRepository: FollowRepository,
+    private readonly blockRepository: BlockRepository,
+  ) {}
 
   async block(userId: string, payload: CreateBlockDto): Promise<void> {
     try {
-      const friendId = payload.blocked_id;
-
+      const friendId = payload.blockedId;
       if (userId === friendId)
         throw new HttpException('you cannot block yourself', HttpStatus.BAD_REQUEST);
 
-      const existingFollow = await this.db.query(
-        'SELECT id FROM follows WHERE user_id = $1 AND friend_id = $2',
-        [userId, friendId],
-      );
+      // Check for previous block
+      const isBlocked = await this.blockRepository.isBlocked(userId, friendId);
+      if (isBlocked) throw new HttpException('user is already blocked', HttpStatus.CONFLICT);
 
-      if (existingFollow.rows.length > 0) {
-        await this.db.query(
-          'DELETE FROM follows WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $3 AND friend_id = $4)',
-          [userId, friendId, friendId, userId],
-        );
+      // check for  previous follow and delete it
+      const existingFollow = await this.followRepository.isFollowed(userId, friendId);
+      if (existingFollow) {
+        await this.followRepository.deleteFollow(userId, friendId);
       }
 
-      await this.db.query('INSERT INTO blocks (id, user_id, friend_id) VALUES ($1, $2, $3)', [
-        randomUUID(),
-        userId,
-        friendId,
-      ]);
+      // create the block
+      await this.blockRepository.createBlock(userId, friendId);
     } catch (err) {
       console.error(err);
 
@@ -73,12 +54,7 @@ export class BlockService {
       if (userId === friendId)
         throw new HttpException('you cannot unblock yourself', HttpStatus.BAD_REQUEST);
 
-      const query = `
-        DELETE FROM blocks
-        WHERE user_id = $1 AND friend_id = $2;
-      `;
-
-      await this.db.query(query, [userId, friendId]);
+      await this.blockRepository.removeBlock(userId, friendId);
     } catch (err) {
       console.error(err);
 
