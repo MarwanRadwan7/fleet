@@ -33,7 +33,7 @@ export class LikeController {
     type: CreateLikePostDto,
   })
   async like(@Req() req, @Body() payload: CreateLikePostDto) {
-    const liked = await this.likeService.like(req.user.id, payload);
+    const liked = await this.likeService.like(req.user.userID, payload);
     return { statusCode: 201, ...liked };
   }
 

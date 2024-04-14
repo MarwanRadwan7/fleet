@@ -36,6 +36,7 @@ export class AuthController {
     type: LoginDto,
   })
   async login(@Request() req) {
+    // This function and refresh token function use req.user.id not userID because it comes from findByUsername from db
     return await this.authService.login(req.user.id, req.user);
   }
 

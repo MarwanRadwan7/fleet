@@ -37,7 +37,7 @@ export class FeedController {
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async feed(@PaginationParams() paginationParams: Pagination, @Req() req) {
-    const userId = req.user.id;
+    const userId = req.user.userID;
     const posts = await this.feedService.feed(userId, paginationParams);
     return { statusCode: 200, message: 'feed retrieved successfully', data: { ...posts } };
   }

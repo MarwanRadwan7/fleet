@@ -79,7 +79,7 @@ export class PostController {
     @Body()
     payload: CreatePostDto,
   ) {
-    const userId: string = req.user.id;
+    const userId: string = req.user.userID;
     let post: PostDto;
     payload.mediaUrl = null;
 

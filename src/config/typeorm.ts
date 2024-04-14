@@ -13,10 +13,11 @@ const config: PostgresConnectionOptions = {
   username: `${process.env.DATABASE_USER}`,
   password: `${process.env.DATABASE_PASSWORD}`,
   port: 5432,
+  // ssl: true,
   schema: 'public',
   entities: [join(__dirname, '..', '**', '*.entity.{ts,js}')],
   migrations: [join('dist/migrations/*.{ts,js}')],
-  synchronize: true,
+  synchronize: true, // Don't use this in production
   migrationsTableName: 'migrations_table',
   migrationsRun: true,
   logging: false,

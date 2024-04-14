@@ -1,10 +1,20 @@
-import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { hash } from 'argon2';
 import { Exclude } from 'class-transformer';
+
 import { Follower, Following } from 'src/follow/follow.entity';
 import { Post } from 'src/post/post.entity';
 import { Block } from 'src/block/block.entity';
 import { PostLike } from 'src/like/like.entity';
+import { Room } from 'src/chat/entities';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -126,4 +136,7 @@ export class User {
 
   @OneToMany(() => PostLike, likes => likes.userId)
   likes: PostLike[];
+
+  @ManyToMany(type => Room, room => room.members)
+  rooms: Room[];
 }

@@ -54,7 +54,7 @@ export class CommentController {
     type: CreateCommentPostDto,
   })
   async create(@Req() req, @Body() payload: CreateCommentPostDto) {
-    const comment = await this.commentService.create(req.user.id, payload);
+    const comment = await this.commentService.create(req.user.userID, payload);
     return { statusCode: 201, message: 'comment created successfully', data: comment };
   }
 

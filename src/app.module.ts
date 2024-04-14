@@ -3,6 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
+import { redisStore } from 'cache-manager-redis-yet';
+import { CacheModule } from '@nestjs/cache-manager';
 
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
@@ -13,6 +15,8 @@ import { LikeModule } from './like/like.module';
 import { CommentModule } from './comment/comment.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { FeedModule } from './feed/feed.module';
+import { EventsModule } from './events/events.module';
+import { ChatModule } from './chat/chat.module';
 import typeorm from './config/typeorm';
 
 @Module({
@@ -31,6 +35,18 @@ import typeorm from './config/typeorm';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => configService.get('typeorm'),
     }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useFactory: async () => ({
+        store: await redisStore({
+          socket: {
+            host: 'localhost',
+            port: 6379,
+          },
+        }),
+      }),
+      // ttl: 10_000, // in milliseconds
+    }),
     UserModule,
     AuthModule,
     PostModule,
@@ -40,6 +56,8 @@ import typeorm from './config/typeorm';
     CommentModule,
     CloudinaryModule,
     FeedModule,
+    EventsModule,
+    ChatModule,
   ],
   providers: [
     {

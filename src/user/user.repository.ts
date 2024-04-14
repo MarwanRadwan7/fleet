@@ -32,7 +32,7 @@ export class UserRepository implements IUserRepository {
     return false;
   }
 
-  async findById(userId: string): Promise<UserDto | undefined> {
+  async findById(userId: string): Promise<User | undefined> {
     return await this.userRepository.findOne({
       where: {
         id: userId,
@@ -40,17 +40,29 @@ export class UserRepository implements IUserRepository {
     });
   }
 
+  // findByUsername is used in user auth to fetch data used in JWT tokens
   async findByUsername(username: string): Promise<UserDto | undefined> {
     return await this.userRepository.findOne({
       select: {
         id: true,
         username: true,
+        email: true,
+        role: true,
         password: true,
         isActive: true,
       },
       where: {
         username,
       },
+    });
+  }
+
+  async findChatRooms(userId: string): Promise<User | undefined> {
+    return await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+      relations: ['rooms'], // populate user's chat rooms
     });
   }
 

@@ -9,6 +9,7 @@ import * as morgan from 'morgan';
 // import * as csurf from 'csurf';
 
 import { AppModule } from './app.module';
+import { SocketIOAdapter } from './config/socket-io-adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -46,6 +47,8 @@ async function bootstrap() {
     methods: ['GET', 'OPTIONS'],
     credentials: true,
   });
+  app.useWebSocketAdapter(new SocketIOAdapter(app, configService));
+
   app.use(helmet());
   app.disable('x-powered-by');
   // app.use(csurf());

@@ -40,7 +40,7 @@ export class FollowController {
     type: CreateFollowDto,
   })
   async follow(@Req() req, @Body() followBody: CreateFollowDto) {
-    await this.followService.follow(req.user.id, followBody);
+    await this.followService.follow(req.user.userID, followBody);
     return { statusCode: 201, message: 'user followed successfully' };
   }
 
@@ -55,7 +55,7 @@ export class FollowController {
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async unFollow(@Req() req, @Param('user_id') followingId: string) {
-    const userId = req.user.id;
+    const userId = req.user.userID;
     const payload: DeleteFollowDto = { followingId };
     await this.followService.unFollow(userId, payload);
   }
