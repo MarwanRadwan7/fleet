@@ -8,6 +8,7 @@ import { Post } from './post.entity';
 import { CreatePostDto, UpdatePostDto } from './dto';
 import { Pagination } from 'src/common/decorator/pagination';
 import { PostDto } from './dto/post.dto';
+import { PageOptionsDto } from 'src/common/page-option.dto';
 
 @Injectable()
 export class PostRepository implements IPostRepository {
@@ -40,10 +41,10 @@ export class PostRepository implements IPostRepository {
   }
 
   async create(userId: string, payload: CreatePostDto): Promise<PostDto> {
-    const hashtags = payload['content']
-      .match(/#(\w+)/g)
-      .map((el: string) => `${el.substring(1)}`)
-      .join(',');
+    let hashtags = '';
+    const hashtagsPayload = payload['content'].match(/#(\w+)/g);
+    if (hashtagsPayload)
+      hashtags = hashtagsPayload.map((el: string) => `${el.substring(1)}`).join(',');
     try {
       const post = this.postRepository.create({
         userId: { id: userId },
@@ -160,14 +161,15 @@ export class PostRepository implements IPostRepository {
     }
   }
 
-  async getAllByUserId(userId: string, page: Pagination): Promise<PostDto[]> {
+  async getAllByUserId(userId: string, page: PageOptionsDto) {
     try {
       const posts = await this.postRepository.find({
         where: {
           userId: { id: userId },
         },
-        take: page.limit,
-        skip: page.offset,
+        take: page.take,
+        skip: page.skip,
+        order: { createdAt: page.order },
       });
 
       return posts;
