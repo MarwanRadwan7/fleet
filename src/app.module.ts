@@ -15,7 +15,6 @@ import { LikeModule } from './like/like.module';
 import { CommentModule } from './comment/comment.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { FeedModule } from './feed/feed.module';
-import { EventsModule } from './events/events.module';
 import { ChatModule } from './chat/chat.module';
 import typeorm from './config/typeorm';
 
@@ -56,7 +55,6 @@ import typeorm from './config/typeorm';
     CommentModule,
     CloudinaryModule,
     FeedModule,
-    EventsModule,
     ChatModule,
   ],
   providers: [
