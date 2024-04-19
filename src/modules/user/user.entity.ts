@@ -9,7 +9,7 @@ import {
 import { hash } from 'argon2';
 import { Exclude } from 'class-transformer';
 
-import { Room } from 'src/chat/entities';
+import { Room } from 'src/modules/chat/entities';
 import { Post } from 'src//modules/post/post.entity';
 import { Block } from 'src/modules/block/block.entity';
 import { PostLike } from 'src/modules/like/like.entity';

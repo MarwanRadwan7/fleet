@@ -14,8 +14,8 @@ import { BlockModule } from './modules/block/block.module';
 import { LikeModule } from './modules/like/like.module';
 import { CommentModule } from './modules/comment/comment.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
-import { FeedModule } from './feed/feed.module';
-import { ChatModule } from './chat/chat.module';
+import { FeedModule } from './modules/feed/feed.module';
+import { ChatModule } from './modules/chat/chat.module';
 import typeorm from './config/typeorm';
 
 @Module({

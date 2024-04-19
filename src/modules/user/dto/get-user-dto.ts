@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-import { FollowsUserDataDto } from 'src/follow/dto';
+import { FollowsUserDataDto } from 'src/modules/follow/dto';
 
 // Request Types - Fields Validation
 export class GetUserDataDto {
