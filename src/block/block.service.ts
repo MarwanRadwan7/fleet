@@ -9,7 +9,7 @@ import { PostgresError } from 'pg-error-enum';
 
 import { CreateBlockDto } from './dto';
 import { BlockRepository } from './block.repository';
-import { FollowRepository } from 'src/follow/follow.repository';
+import { FollowRepository } from 'src/modules/follow/follow.repository';
 
 @Injectable()
 export class BlockService {

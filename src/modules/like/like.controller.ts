@@ -1,4 +1,4 @@
-import { Body, Controller, Req, UseGuards, Post } from '@nestjs/common';
+import { Body, Controller, Req, UseGuards, Post, HttpStatus } from '@nestjs/common';
 import {
   ApiBody,
   ApiCreatedResponse,
@@ -35,7 +35,7 @@ export class LikeController {
   })
   async like(@Req() req, @Body() payload: CreateLikePostDto) {
     const liked = await this.likeService.like(req.user.userID, payload);
-    return { statusCode: 201, ...liked };
+    return { statusCode: HttpStatus.OK, ...liked };
   }
 
   // TODO: Add like for comments

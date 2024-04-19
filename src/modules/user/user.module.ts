@@ -7,7 +7,7 @@ import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { PostModule } from 'src//modules/post/post.module';
 import { UserRepository } from './user.repository';
 import { User } from './user.entity';
-import { FollowModule } from 'src/follow/follow.module';
+import { FollowModule } from 'src/modules/follow/follow.module';
 
 @Module({
   imports: [

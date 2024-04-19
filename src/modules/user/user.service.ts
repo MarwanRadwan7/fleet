@@ -8,7 +8,7 @@ import { hash } from 'argon2';
 import { PostgresError } from 'pg-error-enum';
 
 import { UserRepository } from './user.repository';
-import { FollowRepository } from 'src/follow/follow.repository';
+import { FollowRepository } from 'src/modules/follow/follow.repository';
 import { PageOptionsDto } from 'src/common/dto/pagination';
 import { CreateUserDto, GetUserFollowingsResponseDto, UpdateUserDto, UserDto } from './dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';

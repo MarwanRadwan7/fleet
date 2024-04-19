@@ -1,4 +1,14 @@
-import { Body, Controller, Req, UseGuards, Post, Delete, HttpCode, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Req,
+  UseGuards,
+  Post,
+  Delete,
+  HttpCode,
+  Param,
+  HttpStatus,
+} from '@nestjs/common';
 
 import { JwtGuard } from 'src/auth/guard';
 import { FollowService } from './follow.service';
@@ -41,12 +51,12 @@ export class FollowController {
   })
   async follow(@Req() req, @Body() followBody: CreateFollowDto) {
     await this.followService.follow(req.user.userID, followBody);
-    return { statusCode: 201, message: 'user followed successfully' };
+    return { statusCode: HttpStatus.CREATED, message: 'user followed successfully' };
   }
 
   @Delete('/:user_id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtGuard)
-  @HttpCode(204)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: 'Unfollow a user' })
   @ApiNoContentResponse({ description: 'user unfollowed successfully' })

@@ -13,7 +13,7 @@ import { Room } from 'src/chat/entities';
 import { Post } from 'src//modules/post/post.entity';
 import { Block } from 'src/block/block.entity';
 import { PostLike } from 'src/modules/like/like.entity';
-import { Follower, Following } from 'src/follow/follow.entity';
+import { Follower, Following } from 'src/modules/follow/follow.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
