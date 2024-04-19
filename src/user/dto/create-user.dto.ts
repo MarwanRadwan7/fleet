@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsString, Length, Matches } from 'class-validator';
+import { IsDateString, IsEmail, IsOptional, IsString, Length, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
@@ -46,7 +46,7 @@ export class CreateUserDto {
     example: '2024-01-01T12:30:45Z',
     description: 'birth date of the user on  ISO 8601 format',
   })
-  @IsString()
+  @IsDateString()
   public birthDate: string;
 }
 

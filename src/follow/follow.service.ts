@@ -9,10 +9,9 @@ import { PostgresError } from 'pg-error-enum';
 import { CreateFollowDto, DeleteFollowDto } from './dto';
 import { FollowRepository } from './follow.repository';
 import { BlockRepository } from 'src/block/block.repository';
-import { IFollowService } from './contract/contract';
 
 @Injectable()
-export class FollowService implements IFollowService {
+export class FollowService {
   constructor(
     private readonly followRepository: FollowRepository,
     private readonly blockRepository: BlockRepository,

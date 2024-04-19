@@ -3,15 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 
-import { IPostRepository } from './contract';
 import { Post } from './post.entity';
 import { CreatePostDto, UpdatePostDto } from './dto';
-import { Pagination } from 'src/common/decorator/pagination';
 import { PostDto } from './dto/post.dto';
-import { PageOptionsDto } from 'src/common/page-option.dto';
+import { PageOptionsDto } from 'src/common/dto/pagination';
 
 @Injectable()
-export class PostRepository implements IPostRepository {
+export class PostRepository {
   private postRepository: Repository<Post>;
 
   constructor(@InjectRepository(Post) postRepository: Repository<Post>) {
@@ -179,7 +177,7 @@ export class PostRepository implements IPostRepository {
     }
   }
 
-  async getPostsByHashtags(hashtags: string[], page: Pagination): Promise<any> {
+  async getPostsByHashtags(hashtags: string[], pageOptions: PageOptionsDto): Promise<any> {
     try {
       const posts = this.postRepository.query(
         `
@@ -189,7 +187,7 @@ export class PostRepository implements IPostRepository {
           LIMIT $1
           OFFSET $2;
       `,
-        [page.limit, page.offset, ...hashtags],
+        [pageOptions.take, pageOptions.skip, ...hashtags],
       );
 
       return posts;
@@ -199,7 +197,7 @@ export class PostRepository implements IPostRepository {
     }
   }
 
-  async getFeedPosts(userId: string, page: Pagination): Promise<any> {
+  async getFeedPosts(userId: string, pageOptions: PageOptionsDto): Promise<any> {
     try {
       return await this.postRepository
         .createQueryBuilder('p')
@@ -225,8 +223,8 @@ export class PostRepository implements IPostRepository {
         .innerJoin('users', 'u', 'f.following_id = u.id')
         .where('f.user_id= :userId', { userId })
         .orderBy('p.created_at', 'DESC')
-        .limit(page.limit)
-        .offset(page.offset)
+        .limit(pageOptions.take)
+        .offset(pageOptions.skip)
         .execute();
     } catch (err) {
       console.error(err);

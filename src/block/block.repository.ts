@@ -4,10 +4,9 @@ import { Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 
 import { Block } from './block.entity';
-import { IBlockRepository } from './contract';
 
 @Injectable()
-export class BlockRepository implements IBlockRepository {
+export class BlockRepository {
   private blockRepository: Repository<Block>;
 
   constructor(@InjectRepository(Block) blockRepository: Repository<Block>) {

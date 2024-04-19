@@ -21,7 +21,7 @@ export class RoomRepository {
     });
   }
 
-  async createPublicRoom(roomName: string): Promise<Room | undefined> {
+  async createPublicRoom(roomName: string): Promise<Room> {
     try {
       const room = this.roomRepository.create({
         name: roomName,
@@ -34,7 +34,7 @@ export class RoomRepository {
     }
   }
 
-  async createPrivateRoom(sender: User, receiver: User): Promise<Room | undefined> {
+  async createPrivateRoom(sender: User, receiver: User): Promise<Room> {
     try {
       // Use this initialization with typeORM
       // if you define a record has Many-to-Many relation
@@ -50,26 +50,20 @@ export class RoomRepository {
     }
   }
 
+  // TODO: Delete publicRoom
+  // TODO: Update publicRoom
+
   // FIXME: Fix the saving and using upsert
-  async save(room: Room): Promise<Room | undefined> {
+  async save(room: Room): Promise<Room> {
     return await this.roomRepository.save(room);
   }
 
-  async findOneByName(name: string): Promise<Room | undefined> {
+  async findOneByName(name: string): Promise<Room> {
     return await this.roomRepository.findOne({ where: { name }, relations: { members: true } });
   }
 
   async findOneById(id: string): Promise<Room | undefined> {
     return await this.roomRepository.findOne({ where: { id }, relations: { members: true } });
-  }
-
-  async findMyRooms(): Promise<Room[]> {
-    const rooms = await this.roomRepository.find();
-    return rooms;
-  }
-
-  async findAll(): Promise<any> {
-    return this.roomRepository.find();
   }
 
   async delete(id: string): Promise<any> {

@@ -28,6 +28,13 @@ export class Message {
 
   @Column({
     select: true,
+    name: 'is_edited',
+    default: false,
+  })
+  public isEdited: boolean;
+
+  @Column({
+    select: true,
     name: 'created_at',
     type: 'timestamp with time zone',
     default: () => 'CURRENT_TIMESTAMP',

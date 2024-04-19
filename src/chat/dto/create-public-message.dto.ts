@@ -1,18 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
-export class CreatePrivateMessageDto {
+export class CreatePublicMessageDto {
   // Content of the message
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
   text: string;
-
-  // Id of the receiver -- used to get the socket from the cache
-  @IsUUID()
-  @IsNotEmpty()
-  @ApiProperty()
-  receiver: string;
 
   // Id of the chat room
   @IsUUID()

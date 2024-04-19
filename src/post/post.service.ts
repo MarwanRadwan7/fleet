@@ -5,23 +5,15 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 
-import { Pagination } from 'src/common/decorator/pagination';
-import {
-  CreatePostDto,
-  GetPostCommentsResponseDto,
-  GetPostLikesResponseDto,
-  UpdatePostDto,
-  GetPostsByUserResponseDto,
-  PostDto,
-} from './dto';
+import { CreatePostDto, UpdatePostDto, PostDto } from './dto';
 import { PostRepository } from './post.repository';
 import { UserRepository } from 'src/user/user.repository';
 import { LikeRepository } from 'src/like/like.repository';
 import { CommentRepository } from 'src/comment/comment.repository';
-import { IPostService } from './contract/post.service.interface';
+import { PageOptionsDto } from 'src/common/dto/pagination';
 
 @Injectable()
-export class PostService implements IPostService {
+export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
     private readonly userRepository: UserRepository,
@@ -90,12 +82,13 @@ export class PostService implements IPostService {
 
   // TODO: Cache
 
-  async getPostLikes(postId: string, page: Pagination): Promise<GetPostLikesResponseDto> {
+  // async getPostLikes(postId: string, page: Pagination): Promise<GetPostLikesResponseDto> {
+  async getPostLikes(postId: string, pageOptionsDto: PageOptionsDto) {
     try {
       const isExist = await this.postRepository.isExist(postId);
       if (!isExist) throw new HttpException('post not found', HttpStatus.NOT_FOUND);
 
-      const likes = await this.likeRepository.getPostLikesData(postId, page);
+      const likes = await this.likeRepository.getPostLikesData(postId, pageOptionsDto);
 
       return { count: likes.length, likes: likes };
     } catch (err) {
@@ -106,12 +99,13 @@ export class PostService implements IPostService {
   }
 
   // TODO: Cache
-  async getPostComments(postId: string, page: Pagination): Promise<GetPostCommentsResponseDto> {
+  // async getPostComments(postId: string, page: Pagination): Promise<GetPostCommentsResponseDto> {
+  async getPostComments(postId: string, pageOptionsDto: PageOptionsDto) {
     try {
       const isExist = await this.postRepository.isExist(postId);
       if (!isExist) throw new HttpException('post not found', HttpStatus.NOT_FOUND);
 
-      const comments = await this.commentRepository.getPostCommentsData(postId, page);
+      const comments = await this.commentRepository.getPostCommentsData(postId, pageOptionsDto);
 
       return { count: comments.length, comments: comments };
     } catch (err) {
@@ -121,12 +115,12 @@ export class PostService implements IPostService {
     }
   }
 
-  async getPostsByUser(userId: string, page: Pagination): Promise<GetPostsByUserResponseDto> {
+  async getPostsByUser(userId: string, pageOptionsDto: PageOptionsDto) {
     try {
       const user = await this.userRepository.isExist(userId);
       if (!user) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
-      const posts = await this.postRepository.getAllByUserId(userId, page);
+      const posts = await this.postRepository.getAllByUserId(userId, pageOptionsDto);
 
       return { count: posts.length, posts: posts };
     } catch (err) {
@@ -136,11 +130,11 @@ export class PostService implements IPostService {
     }
   }
 
-  async getPostsByHashtags(hashtags: string[], page: Pagination): Promise<any> {
+  async getPostsByHashtags(hashtags: string[], pageOptionsDto: PageOptionsDto): Promise<any> {
     try {
       const hashtagsRegEX = hashtags.map(el => `%${el}%`);
 
-      const posts = await this.postRepository.getPostsByHashtags(hashtagsRegEX, page);
+      const posts = await this.postRepository.getPostsByHashtags(hashtagsRegEX, pageOptionsDto);
 
       return { count: posts.length, posts: posts };
     } catch (err) {

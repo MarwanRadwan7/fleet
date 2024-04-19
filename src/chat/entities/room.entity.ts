@@ -13,7 +13,7 @@ export class Room {
 
   @Column({
     nullable: false,
-    unique: true,
+    unique: true, // Room name is unique --> Could change this in future
   })
   name: string;
 
@@ -41,7 +41,7 @@ export class Room {
   public updatedAt: Date;
 
   // Relations
-  @ManyToMany(type => User, user => user.rooms, {
+  @ManyToMany(() => User, user => user.rooms, {
     eager: true,
   })
   @JoinTable()

@@ -2,7 +2,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { PostLike } from './like.entity';
-import { Pagination } from 'src/common/decorator/pagination';
+import { PageOptionsDto } from 'src/common/dto/pagination';
 
 export class LikeRepository {
   private likeRepository: Repository<PostLike>;
@@ -47,7 +47,7 @@ export class LikeRepository {
     }
   }
 
-  async getPostLikesData(postId: string, page: Pagination): Promise<any> {
+  async getPostLikesData(postId: string, pageOptions: PageOptionsDto): Promise<any> {
     try {
       const likesData = await this.likeRepository
         .createQueryBuilder('l')
@@ -60,8 +60,9 @@ export class LikeRepository {
         ])
         .leftJoin('users', 'u', 'l.user_id = u.id')
         .where('l.post_id= :postId', { postId })
-        .limit(page.limit)
-        .offset(page.offset)
+        .limit(pageOptions.take)
+        .offset(pageOptions.skip)
+        .orderBy('l.createdAt', pageOptions.order)
         .execute();
 
       return likesData;

@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   UploadedFile,
   ClassSerializerInterceptor,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -48,7 +49,7 @@ import {
   UpdateUserResponseDtoExample,
   UserDto,
 } from './dto';
-import { Pagination, PaginationParams } from 'src/common/decorator/pagination/';
+import { PageOptionsDto } from 'src/common/dto/pagination';
 
 @ApiTags('User')
 @Controller('users')
@@ -135,12 +136,12 @@ export class UserController {
   @ApiNotFoundResponse({ description: 'user not found' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async getUserFollowers(
-    @PaginationParams() paginationParams: Pagination,
+    @Query() pageOptionsDto: PageOptionsDto,
     @Param('user_id') userId: string,
   ) {
     const followers: GetUserFollowersResponseDto = await this.userService.getUserFollowers(
       userId,
-      paginationParams,
+      pageOptionsDto,
     );
     return { statusCode: 200, message: 'followers retrieved successfully', data: { ...followers } };
   }
@@ -157,12 +158,12 @@ export class UserController {
   @ApiNotFoundResponse({ description: 'user not found' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async getUserFollowings(
-    @PaginationParams() paginationParams: Pagination,
+    @Query() pageOptionsDto: PageOptionsDto,
     @Param('user_id') userId: string,
   ) {
     const followings: GetUserFollowingsResponseDto = await this.userService.getUserFollowings(
       userId,
-      paginationParams,
+      pageOptionsDto,
     );
     return {
       statusCode: 200,
@@ -182,13 +183,10 @@ export class UserController {
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
   @ApiNotFoundResponse({ description: 'user not found' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
-  async getUserPosts(
-    @PaginationParams() paginationParams: Pagination,
-    @Param('user_id') userId: string,
-  ) {
+  async getUserPosts(@Query() pageOptionsDto: PageOptionsDto, @Param('user_id') userId: string) {
     const posts: GetPostsByUserResponseDto = await this.postService.getPostsByUser(
       userId,
-      paginationParams,
+      pageOptionsDto,
     );
     return { statusCode: 200, message: 'posts retrieved successfully', data: { ...posts } };
   }

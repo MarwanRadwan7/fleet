@@ -44,7 +44,7 @@ import typeorm from './config/typeorm';
           },
         }),
       }),
-      // ttl: 10_000, // in milliseconds
+      // ttl: 10_000birthDate, // in milliseconds
     }),
     UserModule,
     AuthModule,

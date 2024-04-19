@@ -10,10 +10,9 @@ import { CommentDto, CreateCommentPostDto, UpdateCommentPostDto } from './dto';
 import { CommentRepository } from './comment.repository';
 import { PostRepository } from 'src/post/post.repository';
 import { PostComment } from './comment.entity';
-import { ICommentService } from './contract';
 
 @Injectable()
-export class CommentService implements ICommentService {
+export class CommentService {
   constructor(
     private readonly commentRepository: CommentRepository,
     private readonly postRepository: PostRepository,

@@ -1,9 +1,9 @@
-import { InputType } from '@nestjs/graphql';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString } from 'class-validator';
 
-@InputType()
 export class UpdateMessageDto {
-  id: string;
-  message: string;
-  authorId: string;
-  conversationId: string;
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  text: string;
 }

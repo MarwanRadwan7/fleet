@@ -1,10 +1,10 @@
+import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
 import { Message, Room } from '../entities';
-import { UpdateMessageDto } from '../dto';
 import { User } from 'src/user/user.entity';
+import { PageOptionsDto } from 'src/common/dto/pagination';
 
 @Injectable()
 export class MessageRepository {
@@ -14,61 +14,47 @@ export class MessageRepository {
     this.messageRepository = messageRepository;
   }
 
-  // FIXME: Delete all the try-catch blocks and only use the repo in the service not gateway
-
-  async createPrivateMessage(
-    message: string,
-    sender: User,
-    room: Room,
-  ): Promise<Message | undefined> {
-    try {
-      const createdMessage = new Message();
-      createdMessage.message = message;
-      createdMessage.sender = sender;
-      createdMessage.room = room;
-      await this.messageRepository.save(createdMessage);
-      return createdMessage;
-    } catch (err) {
-      // Rollback
-      throw err;
-    }
+  async create(message: string, sender: User, room: Room): Promise<Message> {
+    const createdMessage = new Message();
+    createdMessage.message = message;
+    createdMessage.sender = sender;
+    createdMessage.room = room;
+    await this.messageRepository.save(createdMessage);
+    return createdMessage;
   }
 
-  async findOne(id: string) {
-    try {
-      return this.messageRepository.findOne({ where: { id } });
-    } catch (err) {
-      // Rollback
-      throw err;
-    }
+  async update(msgId: string, text: string) {
+    return await this.messageRepository.update(msgId, {
+      isEdited: true,
+      message: text,
+      updatedAt: new Date().toISOString(),
+    });
   }
 
-  async update(payload: UpdateMessageDto): Promise<any> {
-    try {
-      return await this.messageRepository.update(payload.id, {
-        message: payload.message,
-      });
-    } catch (err) {
-      // Rollback
-      throw err;
-    }
+  async delete(msgId: string) {
+    return await this.messageRepository.delete(msgId);
   }
 
-  async findAll(): Promise<any> {
-    try {
-      return this.messageRepository.find();
-    } catch (err) {
-      // Rollback
-      throw err;
-    }
+  async findOne(msgId: string) {
+    return this.messageRepository.findOne({ where: { id: msgId }, relations: ['sender'] });
   }
 
-  async delete(id: string): Promise<any> {
-    try {
-      return this.messageRepository.delete(id);
-    } catch (err) {
-      // Rollback
-      throw err;
-    }
+  async findRoomMessages(roomId: string, pageOptions: PageOptionsDto): Promise<Message[]> {
+    return await this.messageRepository.find({
+      relations: {
+        sender: true,
+        room: true,
+      },
+      where: {
+        room: {
+          id: roomId,
+        },
+      },
+      skip: pageOptions.skip,
+      take: pageOptions.take,
+      order: {
+        createdAt: pageOptions.order,
+      },
+    });
   }
 }

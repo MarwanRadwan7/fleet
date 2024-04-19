@@ -2,7 +2,6 @@ import {
   BeforeInsert,
   Column,
   Entity,
-  JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -10,11 +9,11 @@ import {
 import { hash } from 'argon2';
 import { Exclude } from 'class-transformer';
 
-import { Follower, Following } from 'src/follow/follow.entity';
+import { Room } from 'src/chat/entities';
 import { Post } from 'src/post/post.entity';
 import { Block } from 'src/block/block.entity';
 import { PostLike } from 'src/like/like.entity';
-import { Room } from 'src/chat/entities';
+import { Follower, Following } from 'src/follow/follow.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -121,7 +120,6 @@ export class User {
   public updatedAt: Date;
 
   // Relations
-
   @OneToMany(() => Following, following => following.userId)
   followings: Following[];
 
@@ -137,6 +135,6 @@ export class User {
   @OneToMany(() => PostLike, likes => likes.userId)
   likes: PostLike[];
 
-  @ManyToMany(type => Room, room => room.members)
+  @ManyToMany(() => Room, room => room.members)
   rooms: Room[];
 }

@@ -11,6 +11,7 @@ import {
   UseGuards,
   UploadedFile,
   UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -32,7 +33,6 @@ import { PostService } from './post.service';
 import { JwtGuard } from 'src/auth/guard';
 import { ParsePipe, SharpTransformPipe } from 'src/common/pipe';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { Pagination, PaginationParams } from 'src/common/decorator/pagination';
 import {
   CreatePostDto,
   CreatePostResponseDtoExample,
@@ -45,6 +45,7 @@ import {
   PostDto,
   GetPostCommentsResponseDtoExample,
 } from './dto';
+import { PageOptionsDto } from 'src/common/dto/pagination';
 
 @Controller('posts')
 @ApiTags('Posts')
@@ -136,13 +137,10 @@ export class PostController {
   @ApiNotFoundResponse({ description: 'post not found' })
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
-  async getPostLikes(
-    @PaginationParams() paginationParams: Pagination,
-    @Param('post_id') postId: string,
-  ) {
+  async getPostLikes(@Query() pageOptionsDto: PageOptionsDto, @Param('post_id') postId: string) {
     const likes: GetPostLikesResponseDto = await this.postService.getPostLikes(
       postId,
-      paginationParams,
+      pageOptionsDto,
     );
     return { statusCode: 200, message: 'likes retrieved successfully', data: { ...likes } };
   }
@@ -158,13 +156,10 @@ export class PostController {
   @ApiNotFoundResponse({ description: 'post not found' })
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
-  async getPostComments(
-    @PaginationParams() paginationParams: Pagination,
-    @Param('post_id') postId: string,
-  ) {
+  async getPostComments(@Query() pageOptionsDto: PageOptionsDto, @Param('post_id') postId: string) {
     const comments: GetPostCommentsResponseDto = await this.postService.getPostComments(
       postId,
-      paginationParams,
+      pageOptionsDto,
     );
     return { statusCode: 200, message: 'comments retrieved successfully', data: { ...comments } };
   }

@@ -10,10 +10,9 @@ import { PostgresError } from 'pg-error-enum';
 import { CreateBlockDto } from './dto';
 import { BlockRepository } from './block.repository';
 import { FollowRepository } from 'src/follow/follow.repository';
-import { IBlockService } from './contract';
 
 @Injectable()
-export class BlockService implements IBlockService {
+export class BlockService {
   constructor(
     private readonly followRepository: FollowRepository,
     private readonly blockRepository: BlockRepository,

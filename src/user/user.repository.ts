@@ -2,13 +2,13 @@ import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { IUserRepository } from './contract';
 import { CreateUserDto, UpdateUserDto, UserDto } from './dto';
 import { User } from './user.entity';
 import { isUUID } from 'class-validator';
+import { PageOptionsDto } from 'src/common/dto/pagination';
 
 @Injectable()
-export class UserRepository implements IUserRepository {
+export class UserRepository {
   private userRepository: Repository<User>;
 
   constructor(@InjectRepository(User) userRepository: Repository<User>) {
@@ -57,12 +57,15 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  async findChatRooms(userId: string): Promise<User | undefined> {
+  async findChatRooms(userId: string, pageOptions: PageOptionsDto): Promise<User | undefined> {
     return await this.userRepository.findOne({
       where: {
         id: userId,
       },
       relations: ['rooms'], // populate user's chat rooms
+      order: {
+        rooms: { updatedAt: pageOptions?.order ?? 'DESC' },
+      },
     });
   }
 

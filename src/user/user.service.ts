@@ -7,20 +7,13 @@ import {
 import { hash } from 'argon2';
 import { PostgresError } from 'pg-error-enum';
 
-import {
-  CreateUserDto,
-  GetUserFollowersResponseDto,
-  GetUserFollowingsResponseDto,
-  UpdateUserDto,
-  UserDto,
-} from './dto';
-import { Pagination } from 'src/common/decorator/pagination';
 import { UserRepository } from './user.repository';
 import { FollowRepository } from 'src/follow/follow.repository';
-import { IUserService } from './contract';
+import { PageOptionsDto } from 'src/common/dto/pagination';
+import { CreateUserDto, GetUserFollowingsResponseDto, UpdateUserDto, UserDto } from './dto';
 
 @Injectable()
-export class UserService implements IUserService {
+export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly followRepository: FollowRepository,
@@ -80,12 +73,13 @@ export class UserService implements IUserService {
     }
   }
 
-  async getUserFollowers(userId: string, page: Pagination): Promise<GetUserFollowersResponseDto> {
+  // async getUserFollowers(userId: string, page: Pagination): Promise<GetUserFollowersResponseDto> {
+  async getUserFollowers(userId: string, pageOptionsDto: PageOptionsDto) {
     try {
       const isExist = await this.userRepository.isExist(userId);
       if (!isExist) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
-      const users = await this.followRepository.getUserFollowers(userId, page);
+      const users = await this.followRepository.getUserFollowers(userId, pageOptionsDto);
 
       return { count: users.length, followers: users };
     } catch (err) {
@@ -95,12 +89,16 @@ export class UserService implements IUserService {
     }
   }
 
-  async getUserFollowings(userId: string, page: Pagination): Promise<GetUserFollowingsResponseDto> {
+  // async getUserFollowings(userId: string, page: Pagination): Promise<GetUserFollowingsResponseDto> {
+  async getUserFollowings(
+    userId: string,
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<GetUserFollowingsResponseDto> {
     try {
       const isExist = await this.userRepository.isExist(userId);
       if (!isExist) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
-      const users = await this.followRepository.getUserFollowings(userId, page);
+      const users = await this.followRepository.getUserFollowings(userId, pageOptionsDto);
 
       return { count: users.length, followings: users };
     } catch (err) {

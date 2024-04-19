@@ -15,7 +15,7 @@ import { JwtGuard } from 'src/auth/guard';
 import { PostService } from 'src/post/post.service';
 import { GetFeedResponseDtoExample, GetTopFeedResponseDtoExample } from './dto';
 import { GetPostsByHashtagsResponseDtoExample, PostDto } from 'src/post/dto';
-import { Pagination, PaginationParams } from 'src/common/decorator/pagination';
+import { PageOptionsDto } from 'src/common/dto/pagination';
 
 @Controller('feed')
 @ApiTags('Feed')
@@ -36,9 +36,9 @@ export class FeedController {
   @ApiNotFoundResponse({ description: 'user not found' })
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
-  async feed(@PaginationParams() paginationParams: Pagination, @Req() req) {
+  async feed(@Query() pageOptionsDto: PageOptionsDto, @Req() req) {
     const userId = req.user.userID;
-    const posts = await this.feedService.feed(userId, paginationParams);
+    const posts = await this.feedService.feed(userId, pageOptionsDto);
     return { statusCode: 200, message: 'feed retrieved successfully', data: { ...posts } };
   }
 
@@ -60,15 +60,15 @@ export class FeedController {
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   @ApiQuery({ name: 'hashtags', example: '?hashtags=webdev&hashtags=programming&hashtags=life' })
   async postsByHashtags(
-    @PaginationParams() paginationParams: Pagination,
+    @Query() pageOptionsDto: PageOptionsDto,
     @Query() hashtags: { hashtags: string[] },
   ) {
     let posts: PostDto;
     if (Array.isArray(hashtags.hashtags)) {
-      posts = await this.postService.getPostsByHashtags(hashtags.hashtags, paginationParams);
+      posts = await this.postService.getPostsByHashtags(hashtags.hashtags, pageOptionsDto);
     } else {
       const hashes = Array(hashtags.hashtags);
-      posts = await this.postService.getPostsByHashtags(hashes, paginationParams);
+      posts = await this.postService.getPostsByHashtags(hashes, pageOptionsDto);
     }
     return { statusCode: 200, message: 'feed retrieved successfully', data: { ...posts } };
   }

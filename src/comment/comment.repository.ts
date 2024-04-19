@@ -4,10 +4,9 @@ import { isUUID } from 'class-validator';
 
 import { PostComment } from './comment.entity';
 import { CommentDto, CreateCommentPostDto, UpdateCommentPostDto } from './dto';
-import { Pagination } from 'src/common/decorator/pagination';
-import { ICommentRepository } from './contract';
+import { PageOptionsDto } from 'src/common/dto/pagination';
 
-export class CommentRepository implements ICommentRepository {
+export class CommentRepository {
   private commentRepository: Repository<PostComment>;
 
   constructor(@InjectRepository(PostComment) commentRepository: Repository<PostComment>) {
@@ -72,7 +71,7 @@ export class CommentRepository implements ICommentRepository {
     }
   }
 
-  async getPostCommentsData(postId: string, page: Pagination): Promise<any> {
+  async getPostCommentsData(postId: string, pageOptions: PageOptionsDto): Promise<any> {
     try {
       const likesData = await this.commentRepository
         .createQueryBuilder('c')
@@ -90,8 +89,9 @@ export class CommentRepository implements ICommentRepository {
         ])
         .leftJoin('users', 'u', 'c.user_id = u.id')
         .where('c.post_id= :postId', { postId })
-        .limit(page.limit)
-        .offset(page.offset)
+        .limit(pageOptions.take)
+        .offset(pageOptions.skip)
+        .orderBy('c.createdAt', pageOptions.order)
         .execute();
 
       return likesData;
@@ -105,6 +105,7 @@ export class CommentRepository implements ICommentRepository {
     try {
       await this.commentRepository.update(commentId, {
         content: payload.content,
+        updatedAt: new Date().toISOString(),
       });
       return await this.get(commentId);
     } catch (err) {

@@ -3,13 +3,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Follower, Following } from './follow.entity';
-import { IFollowRepository } from './contract/contract';
 import { connectionSource } from 'src/config/typeorm';
-import { Pagination } from 'src/common/decorator/pagination';
-import { FollowsUserDataDto } from './dto';
+import { PageOptionsDto } from 'src/common/dto/pagination';
 
 @Injectable()
-export class FollowRepository implements IFollowRepository {
+export class FollowRepository {
   private followingsRepository: Repository<Following>;
   private followersRepository: Repository<Follower>;
 
@@ -105,7 +103,8 @@ export class FollowRepository implements IFollowRepository {
     }
   }
 
-  async getUserFollowings(userId: string, page: Pagination): Promise<FollowsUserDataDto[]> {
+  // async getUserFollowings(userId: string, page: Pagination): Promise<FollowsUserDataDto[]> {
+  async getUserFollowings(userId: string, pageOptions: PageOptionsDto) {
     const followings = await this.followingsRepository
       .createQueryBuilder('f')
       .select([
@@ -117,14 +116,16 @@ export class FollowRepository implements IFollowRepository {
       ])
       .leftJoin('users', 'u', 'f.following_id = u.id')
       .where('f.user_id = :userId', { userId })
-      .limit(page.limit)
-      .offset(page.offset)
+      .limit(pageOptions.take)
+      .offset(pageOptions.skip)
+      .orderBy('f.createdAt', pageOptions.order)
       .getRawMany();
 
     return followings;
   }
 
-  async getUserFollowers(userId: string, page: Pagination): Promise<FollowsUserDataDto[]> {
+  // async getUserFollowers(userId: string, page: Pagination): Promise<FollowsUserDataDto[]> {
+  async getUserFollowers(userId: string, pageOptions: PageOptionsDto) {
     const followers = await this.followersRepository
       .createQueryBuilder('f')
       .select([
@@ -136,8 +137,9 @@ export class FollowRepository implements IFollowRepository {
       ])
       .leftJoin('users', 'u', 'f.follower_id = u.id')
       .where('f.user_id = :userId', { userId })
-      .limit(page.limit)
-      .offset(page.offset)
+      .limit(pageOptions.take)
+      .offset(pageOptions.skip)
+      .orderBy('f.createdAt', pageOptions.order)
       .getRawMany();
 
     return followers;
