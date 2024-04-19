@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { PostgresError } from 'pg-error-enum';
@@ -13,6 +14,8 @@ import { FollowRepository } from 'src/modules/follow/follow.repository';
 
 @Injectable()
 export class BlockService {
+  private readonly logger = new Logger(BlockService.name);
+
   constructor(
     private readonly followRepository: FollowRepository,
     private readonly blockRepository: BlockRepository,
@@ -37,8 +40,7 @@ export class BlockService {
       // create the block
       await this.blockRepository.createBlock(userId, friendId);
     } catch (err) {
-      console.error(err);
-
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       if (err.code === PostgresError.UNIQUE_VIOLATION)
         throw new HttpException('user is already blocked', HttpStatus.CONFLICT);
@@ -55,8 +57,7 @@ export class BlockService {
 
       await this.blockRepository.removeBlock(userId, friendId);
     } catch (err) {
-      console.error(err);
-
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       if (err.code === PostgresError.FOREIGN_KEY_VIOLATION)
         throw new NotFoundException('user not found');

@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 
 import { CreatePostDto, UpdatePostDto, PostDto } from './dto';
@@ -15,6 +16,7 @@ import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class PostService {
+  private readonly logger = new Logger(PostService.name);
   constructor(
     private readonly postRepository: PostRepository,
     private readonly userRepository: UserRepository,
@@ -40,7 +42,7 @@ export class PostService {
 
       return post;
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       throw new InternalServerErrorException();
     }
   }
@@ -54,8 +56,7 @@ export class PostService {
 
       return post;
     } catch (err) {
-      console.error(err);
-
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
@@ -70,8 +71,7 @@ export class PostService {
 
       return post;
     } catch (err) {
-      console.error(err);
-
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
@@ -84,7 +84,7 @@ export class PostService {
 
       await this.postRepository.delete(postId);
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
@@ -99,7 +99,7 @@ export class PostService {
 
       return { count: likes.length, likes: likes };
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
@@ -114,7 +114,7 @@ export class PostService {
 
       return { count: comments.length, comments: comments };
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
@@ -129,7 +129,7 @@ export class PostService {
 
       return { count: posts.length, posts: posts };
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
@@ -143,8 +143,7 @@ export class PostService {
 
       return { count: posts.length, posts: posts };
     } catch (err) {
-      console.error(err);
-
+      this.logger.error(err);
       throw new InternalServerErrorException();
     }
   }

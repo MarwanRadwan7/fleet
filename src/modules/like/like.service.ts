@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { PostgresError } from 'pg-error-enum';
 
@@ -12,6 +13,7 @@ import { PostRepository } from 'src//modules/post/post.repository';
 
 @Injectable()
 export class LikeService {
+  private readonly logger = new Logger(LikeService.name);
   constructor(
     private readonly postRepository: PostRepository,
     private readonly likeRepository: LikeRepository,
@@ -32,8 +34,7 @@ export class LikeService {
         return { liked: true };
       }
     } catch (err) {
-      console.error(err);
-
+      this.logger.error(err);
       if (err.code === PostgresError.FOREIGN_KEY_VIOLATION)
         throw new HttpException('user or post not found', HttpStatus.NOT_FOUND);
       if (err instanceof HttpException) throw err;

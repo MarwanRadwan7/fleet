@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { PostgresError } from 'pg-error-enum';
 
@@ -12,6 +13,7 @@ import { BlockRepository } from 'src/modules/block/block.repository';
 
 @Injectable()
 export class FollowService {
+  private readonly logger = new Logger(FollowService.name);
   constructor(
     private readonly followRepository: FollowRepository,
     private readonly blockRepository: BlockRepository,
@@ -40,8 +42,7 @@ export class FollowService {
       // Make follow
       await this.followRepository.createFollow(userId, followingId);
     } catch (err) {
-      console.error(err);
-
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       if (err.code === PostgresError.FOREIGN_KEY_VIOLATION)
         throw new HttpException('user not found', HttpStatus.NOT_FOUND);
@@ -61,8 +62,7 @@ export class FollowService {
       // delete the follow
       await this.followRepository.deleteFollow(userId, followingId);
     } catch (err) {
-      console.error(err);
-
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       if (err.code === PostgresError.FOREIGN_KEY_VIOLATION)
         throw new HttpException('user not found', HttpStatus.NOT_FOUND);

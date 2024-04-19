@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 
 import { UserRepository } from 'src//modules/user/user.repository';
@@ -12,6 +13,7 @@ import { PageOptionsDto } from 'src/common/dto/pagination';
 
 @Injectable()
 export class FeedService {
+  private readonly logger = new Logger(FeedService.name);
   constructor(
     private readonly userRepository: UserRepository,
     private readonly postRepository: PostRepository,
@@ -29,7 +31,7 @@ export class FeedService {
 
       return { count: posts.length, posts: posts };
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
 
       if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
@@ -43,7 +45,8 @@ export class FeedService {
 
       return posts;
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
+
       throw new InternalServerErrorException();
     }
   }

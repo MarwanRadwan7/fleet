@@ -54,7 +54,7 @@ async function bootstrap() {
   // app.use(csurf());
 
   app.use(compress());
-  app.use(morgan('dev'));
+  app.use(morgan('combined'));
 
   app.useGlobalPipes(
     new ValidationPipe({

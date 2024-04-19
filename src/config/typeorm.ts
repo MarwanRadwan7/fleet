@@ -13,7 +13,7 @@ const config: PostgresConnectionOptions = {
   username: `${process.env.DATABASE_USER}`,
   password: `${process.env.DATABASE_PASSWORD}`,
   port: 5432,
-  ssl: true,
+  // ssl: true,
   schema: 'public',
   entities: [join(__dirname, '..', '**', '*.entity.{ts,js}')],
   migrations: [join('dist/migrations/*.{ts,js}')],
@@ -27,5 +27,5 @@ export default registerAs('typeorm', () => config);
 export const connectionSource = new DataSource(config);
 connectionSource
   .initialize()
-  .then(() => 'Database Connected')
+  .then(() => console.log('Database Connected'))
   .catch(err => console.error(`Error connecting the database ${err}`));

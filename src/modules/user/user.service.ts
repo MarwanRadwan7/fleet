@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { hash } from 'argon2';
 import { PostgresError } from 'pg-error-enum';
@@ -15,6 +16,7 @@ import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
   constructor(
     private readonly userRepository: UserRepository,
     private readonly followRepository: FollowRepository,
@@ -29,7 +31,7 @@ export class UserService {
       const res = await this.userRepository.create(user);
       return res;
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       if (err.code === PostgresError.UNIQUE_VIOLATION)
         throw new HttpException(
           'email or username address already registered',
@@ -57,7 +59,7 @@ export class UserService {
 
       return user;
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
@@ -72,7 +74,7 @@ export class UserService {
 
       return user;
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
@@ -87,7 +89,7 @@ export class UserService {
 
       return { count: users.length, followers: users };
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
@@ -105,7 +107,7 @@ export class UserService {
 
       return { count: users.length, followings: users };
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
@@ -120,7 +122,7 @@ export class UserService {
 
       return;
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }

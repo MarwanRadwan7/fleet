@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { PostgresError } from 'pg-error-enum';
 
@@ -13,6 +14,7 @@ import { PostComment } from './comment.entity';
 
 @Injectable()
 export class CommentService {
+  private readonly logger = new Logger(CommentService.name);
   constructor(
     private readonly commentRepository: CommentRepository,
     private readonly postRepository: PostRepository,
@@ -30,7 +32,7 @@ export class CommentService {
 
       return comment;
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
 
       if (err.code === PostgresError.FOREIGN_KEY_VIOLATION)
         throw new HttpException('user or post not found', HttpStatus.NOT_FOUND);
@@ -48,8 +50,7 @@ export class CommentService {
 
       return comment;
     } catch (err) {
-      console.error(err);
-
+      this.logger.error(err);
       if (err.code === PostgresError.FOREIGN_KEY_VIOLATION)
         throw new HttpException('user or post not found', HttpStatus.NOT_FOUND);
       if (err instanceof HttpException) throw err;
@@ -66,8 +67,7 @@ export class CommentService {
 
       return comment;
     } catch (err) {
-      console.error(err);
-
+      this.logger.error(err);
       if (err.code === PostgresError.FOREIGN_KEY_VIOLATION)
         throw new HttpException('user or post not found', HttpStatus.NOT_FOUND);
       if (err instanceof HttpException) throw err;
@@ -85,8 +85,7 @@ export class CommentService {
 
       await this.commentRepository.delete(commentId);
     } catch (err) {
-      console.error(err);
-
+      this.logger.error(err);
       if (err.code === PostgresError.FOREIGN_KEY_VIOLATION)
         throw new HttpException('user or post not found', HttpStatus.NOT_FOUND);
       if (err instanceof HttpException) throw err;

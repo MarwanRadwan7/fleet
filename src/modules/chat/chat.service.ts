@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PostgresError } from 'pg-error-enum';
@@ -23,6 +24,7 @@ import { PageOptionsDto } from 'src/common/dto/pagination';
 
 @Injectable()
 export class ChatService {
+  private readonly logger = new Logger(ChatService.name);
   constructor(
     private readonly messageRepository: MessageRepository,
     private readonly roomRepository: RoomRepository,
@@ -38,7 +40,7 @@ export class ChatService {
     try {
       return await this.roomRepository.isExist(payload.name);
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       throw new InternalServerErrorException();
     }
   }
@@ -54,7 +56,7 @@ export class ChatService {
       rooms.forEach(room => roomsToJoin.push(room.name));
       await client.join(roomsToJoin);
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
     }
   }
 
@@ -67,7 +69,7 @@ export class ChatService {
     try {
       return await this.roomRepository.findOneByName(payload.name);
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       throw new InternalServerErrorException();
     }
   }
@@ -87,7 +89,7 @@ export class ChatService {
       await this.roomRepository.save(room);
       return true;
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       throw new InternalServerErrorException();
     }
   }
@@ -102,7 +104,8 @@ export class ChatService {
     try {
       return await this.roomRepository.createPublicRoom(payload.name);
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
+
       if (err.code === PostgresError.UNIQUE_VIOLATION)
         throw new HttpException(
           'public room with the same name already exist',
@@ -126,7 +129,7 @@ export class ChatService {
       const receiver = await this.userRepository.findById(payload.receiver);
       return await this.roomRepository.createPrivateRoom(sender, receiver);
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       if (err.code === PostgresError.UNIQUE_VIOLATION)
         throw new HttpException('private room already exist', HttpStatus.CONFLICT);
       if (err.code === PostgresError.NOT_NULL_VIOLATION)
@@ -156,7 +159,7 @@ export class ChatService {
       }
       return await this.messageRepository.create(payload.text, sender, prvRoom);
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       throw new InternalServerErrorException(err);
     }
   }
@@ -179,7 +182,7 @@ export class ChatService {
       await this.messageRepository.update(msgId, payload.text);
       return await this.messageRepository.findOne(msgId);
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
@@ -199,7 +202,7 @@ export class ChatService {
       }
       await this.messageRepository.delete(msgId);
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
@@ -225,7 +228,7 @@ export class ChatService {
       const msg = await this.messageRepository.findOne(msgId);
       return msg;
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       throw new InternalServerErrorException();
     }
   }
@@ -240,7 +243,7 @@ export class ChatService {
     try {
       return await this.messageRepository.findRoomMessages(roomId, pageOptionsDto);
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       throw new InternalServerErrorException();
     }
   }
