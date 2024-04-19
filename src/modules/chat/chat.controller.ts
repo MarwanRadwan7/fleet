@@ -13,6 +13,7 @@ import {
   Patch,
   Delete,
   HttpCode,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiSecurity } from '@nestjs/swagger';
 
@@ -20,9 +21,11 @@ import { ChatService } from './chat.service';
 import { JwtGuard } from 'src/auth/guard';
 import { PageOptionsDto } from 'src/common/dto/pagination';
 import { CreatePrivateRoomDto, CreatePublicRoomDto, UpdateMessageDto } from './dto';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 
-@UsePipes(new ValidationPipe())
 @Controller('chat')
+@UseInterceptors(CacheInterceptor)
+@UsePipes(new ValidationPipe())
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
@@ -52,6 +55,7 @@ export class ChatController {
 
   // TODO: Paginate this endpoint
   @Get('/rooms')
+  @CacheTTL(20_000)
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   async findAllRooms(@Req() req, @Query() pageOptionsDto: PageOptionsDto) {
@@ -64,6 +68,7 @@ export class ChatController {
   }
 
   @Get('rooms/:id/messages')
+  @CacheTTL(7000)
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   async findRoomMessages(@Param('id') roomId: string, @Query() pageOptionsDto: PageOptionsDto) {

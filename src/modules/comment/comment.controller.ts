@@ -9,6 +9,7 @@ import {
   Get,
   HttpCode,
   Delete,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -22,6 +23,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 
 import { CommentService } from './comment.service';
 import { JwtGuard } from 'src/auth/guard';
@@ -34,6 +36,7 @@ import {
 } from './dto';
 
 @Controller('comments')
+@UseInterceptors(CacheInterceptor)
 @ApiTags('Comments')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
@@ -83,6 +86,7 @@ export class CommentController {
   }
 
   @Get('/:comment_id')
+  @CacheTTL(30_000)
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: 'Gets a comment on a post' })
