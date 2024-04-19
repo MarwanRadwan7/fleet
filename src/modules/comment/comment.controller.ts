@@ -10,6 +10,7 @@ import {
   HttpCode,
   Delete,
   UseInterceptors,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -58,7 +59,7 @@ export class CommentController {
   })
   async create(@Req() req, @Body() payload: CreateCommentPostDto) {
     const comment = await this.commentService.create(req.user.userID, payload);
-    return { statusCode: 201, message: 'comment created successfully', data: comment };
+    return { statusCode: HttpStatus.CREATED, message: 'comment created successfully', data: comment };
   }
 
   @Patch('/:comment_id')
@@ -82,7 +83,7 @@ export class CommentController {
     @Body() payload: UpdateCommentPostDto,
   ) {
     const comment = await this.commentService.update(commentId, payload);
-    return { statusCode: 200, message: 'comment updated successfully', data: comment };
+    return { statusCode: HttpStatus.OK, message: 'comment updated successfully', data: comment };
   }
 
   @Get('/:comment_id')
@@ -99,11 +100,11 @@ export class CommentController {
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async get(@Req() req, @Param('comment_id') commentId: string) {
     const comment = await this.commentService.get(commentId);
-    return { statusCode: 200, message: 'comment retrieved successfully', data: comment };
+    return { statusCode: HttpStatus.OK, message: 'comment retrieved successfully', data: comment };
   }
 
   @Delete('/:comment_id')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: 'Deletes an existing comment on post' })

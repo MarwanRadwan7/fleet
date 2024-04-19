@@ -174,7 +174,7 @@ export class UserController {
       pageOptionsDto,
     );
     return {
-      statusCode: 200,
+      statusCode: HttpStatus.OK,
       message: 'followings retrieved successfully',
       data: { ...followings },
     };

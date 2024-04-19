@@ -1,4 +1,14 @@
-import { Body, Controller, Req, UseGuards, Post, Delete, HttpCode, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Req,
+  UseGuards,
+  Post,
+  Delete,
+  HttpCode,
+  Param,
+  HttpStatus,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -35,12 +45,12 @@ export class BlockController {
   @ApiBody({ required: true, type: CreateBlockDto })
   async block(@Req() req, @Body() payload: CreateBlockDto) {
     await this.blockService.block(req.user.userID, payload);
-    return { statusCode: 201, message: 'user blocked successfully' };
+    return { statusCode: HttpStatus.CREATED, message: 'user blocked successfully' };
   }
 
   @Delete('/:friend_id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtGuard)
-  @HttpCode(204)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: 'Unblock a user' })
   @ApiNoContentResponse({ description: 'user unblocked successfully' })

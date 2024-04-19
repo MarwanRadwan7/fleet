@@ -101,7 +101,7 @@ export class ChatController {
   }
 
   @Delete('messages/:id')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   async deleteMessage(@Req() req, @Param('id') msgId: string) {

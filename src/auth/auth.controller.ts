@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, Request, HttpCode } from '@nestjs/common';
+import { Controller, Post, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import {
   ApiBody,
@@ -23,8 +23,8 @@ export class AuthController {
 
   @Post('login')
   @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
-  @HttpCode(200)
   @ApiOperation({ summary: 'login for an existing post' })
   @ApiOkResponse({ description: 'success', type: LoginResponseDto })
   @ApiNotFoundResponse({ description: 'user not found' })
@@ -41,9 +41,9 @@ export class AuthController {
   }
 
   @Post('refresh-token')
-  @UseGuards(RefreshJwtGuard)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RefreshJwtGuard)
   @ApiOperation({ summary: 'Get a new access_token for a previous authorized user' })
   @ApiOkResponse({ description: 'success', type: RefreshTokenResponseDto })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })

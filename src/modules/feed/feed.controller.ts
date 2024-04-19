@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Query, Req, UseGuards } from '@nestjs/common';
 import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
@@ -39,7 +39,7 @@ export class FeedController {
   async feed(@Query() pageOptionsDto: PageOptionsDto, @Req() req) {
     const userId = req.user.userID;
     const posts = await this.feedService.feed(userId, pageOptionsDto);
-    return { statusCode: 200, message: 'feed retrieved successfully', data: { ...posts } };
+    return { statusCode: HttpStatus.OK, message: 'feed retrieved successfully', data: { ...posts } };
   }
 
   @Get('/top')
@@ -48,7 +48,7 @@ export class FeedController {
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async top() {
     const posts: PostDto[] = await this.feedService.topFeed();
-    return { statusCode: 200, message: 'feed retrieved successfully', data: { posts } };
+    return { statusCode: HttpStatus.OK, message: 'feed retrieved successfully', data: { posts } };
   }
 
   @Get('/hashtags')
@@ -70,6 +70,6 @@ export class FeedController {
       const hashes = Array(hashtags.hashtags);
       posts = await this.postService.getPostsByHashtags(hashes, pageOptionsDto);
     }
-    return { statusCode: 200, message: 'feed retrieved successfully', data: { ...posts } };
+    return { statusCode: HttpStatus.OK, message: 'feed retrieved successfully', data: { ...posts } };
   }
 }
