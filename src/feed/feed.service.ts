@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 
 import { UserRepository } from 'src/user/user.repository';
-import { PostRepository } from 'src/post/post.repository';
-import { PostDto } from 'src/post/dto';
+import { PostRepository } from 'src//modules/post/post.repository';
+import { PostDto } from 'src/modules/post/dto';
 import { PageOptionsDto } from 'src/common/dto/pagination';
 
 @Injectable()

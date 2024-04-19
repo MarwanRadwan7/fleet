@@ -8,7 +8,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { PostModule } from './post/post.module';
+import { PostModule } from './modules/post/post.module';
 import { FollowModule } from './follow/follow.module';
 import { BlockModule } from './block/block.module';
 import { LikeModule } from './like/like.module';

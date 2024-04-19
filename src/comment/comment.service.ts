@@ -8,7 +8,7 @@ import { PostgresError } from 'pg-error-enum';
 
 import { CommentDto, CreateCommentPostDto, UpdateCommentPostDto } from './dto';
 import { CommentRepository } from './comment.repository';
-import { PostRepository } from 'src/post/post.repository';
+import { PostRepository } from 'src//modules/post/post.repository';
 import { PostComment } from './comment.entity';
 
 @Injectable()

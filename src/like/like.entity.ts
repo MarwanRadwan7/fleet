@@ -1,6 +1,6 @@
 import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { User } from 'src/user/user.entity';
-import { Post } from 'src/post/post.entity';
+import { Post } from 'src//modules/post/post.entity';
 
 @Entity({ name: 'post_likes' })
 @Unique('unique_like_record', ['userId', 'postId'])

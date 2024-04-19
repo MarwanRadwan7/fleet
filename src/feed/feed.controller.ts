@@ -12,9 +12,9 @@ import {
 
 import { FeedService } from './feed.service';
 import { JwtGuard } from 'src/auth/guard';
-import { PostService } from 'src/post/post.service';
+import { PostService } from 'src//modules/post/post.service';
 import { GetFeedResponseDtoExample, GetTopFeedResponseDtoExample } from './dto';
-import { GetPostsByHashtagsResponseDtoExample, PostDto } from 'src/post/dto';
+import { GetPostsByHashtagsResponseDtoExample, PostDto } from 'src/modules/post/dto';
 import { PageOptionsDto } from 'src/common/dto/pagination';
 
 @Controller('feed')

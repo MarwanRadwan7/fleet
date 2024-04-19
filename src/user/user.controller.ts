@@ -35,8 +35,8 @@ import { JwtGuard } from 'src/auth/guard';
 import { ParsePipe, SharpTransformPipe } from 'src/common/pipe';
 
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { GetPostsByUserResponseDto, GetPostsByUserResponseDtoExample } from 'src/post/dto';
-import { PostService } from 'src/post/post.service';
+import { GetPostsByUserResponseDto, GetPostsByUserResponseDtoExample } from 'src/modules/post/dto';
+import { PostService } from 'src//modules/post/post.service';
 import {
   CreateUserDto,
   CreateUserResponseExample,

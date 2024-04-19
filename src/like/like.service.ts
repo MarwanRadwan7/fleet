@@ -8,7 +8,7 @@ import { PostgresError } from 'pg-error-enum';
 
 import { CreateLikePostDto, CreateLikePostResponseDto } from './dto';
 import { LikeRepository } from './like.repository';
-import { PostRepository } from 'src/post/post.repository';
+import { PostRepository } from 'src//modules/post/post.repository';
 
 @Injectable()
 export class LikeService {

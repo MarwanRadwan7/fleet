@@ -5,7 +5,7 @@ import { LikeService } from './like.service';
 import { LikeController } from './like.controller';
 import { PostLike } from './like.entity';
 import { LikeRepository } from './like.repository';
-import { PostModule } from 'src/post/post.module';
+import { PostModule } from 'src//modules/post/post.module';
 
 @Module({
   imports: [forwardRef(() => PostModule), TypeOrmModule.forFeature([PostLike, LikeRepository])],
