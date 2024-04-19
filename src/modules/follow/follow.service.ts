@@ -8,7 +8,7 @@ import { PostgresError } from 'pg-error-enum';
 
 import { CreateFollowDto, DeleteFollowDto } from './dto';
 import { FollowRepository } from './follow.repository';
-import { BlockRepository } from 'src/block/block.repository';
+import { BlockRepository } from 'src/modules/block/block.repository';
 
 @Injectable()
 export class FollowService {

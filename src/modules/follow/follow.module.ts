@@ -3,7 +3,7 @@ import { Module, forwardRef } from '@nestjs/common';
 
 import { FollowController } from './follow.controller';
 import { FollowService } from './follow.service';
-import { BlockModule } from 'src/block/block.module';
+import { BlockModule } from 'src/modules/block/block.module';
 import { FollowRepository } from './follow.repository';
 import { Follower, Following } from './follow.entity';
 
