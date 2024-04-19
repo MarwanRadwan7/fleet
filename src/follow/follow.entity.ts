@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
 
-import { User } from 'src/user/user.entity';
+import { User } from 'src//modules/user/user.entity';
 
 @Entity({
   name: 'followings',

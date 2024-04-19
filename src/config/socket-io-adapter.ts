@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { Server, ServerOptions } from 'socket.io';
-import { SocketWithAuth } from 'src/types';
+import { SocketWithAuth } from 'src/common/types';
 
 // This class will help in importing the ports and host
 // of the React Client dynamically to things like CORS

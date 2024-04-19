@@ -7,7 +7,7 @@ import {
 
 import { CreatePostDto, UpdatePostDto, PostDto } from './dto';
 import { PostRepository } from './post.repository';
-import { UserRepository } from 'src/user/user.repository';
+import { UserRepository } from 'src//modules/user/user.repository';
 import { LikeRepository } from 'src/like/like.repository';
 import { CommentRepository } from 'src/comment/comment.repository';
 import { PageOptionsDto } from 'src/common/dto/pagination';
@@ -90,9 +90,6 @@ export class PostService {
     }
   }
 
-  // TODO: Cache
-
-  // async getPostLikes(postId: string, page: Pagination): Promise<GetPostLikesResponseDto> {
   async getPostLikes(postId: string, pageOptionsDto: PageOptionsDto) {
     try {
       const isExist = await this.postRepository.isExist(postId);
@@ -108,8 +105,6 @@ export class PostService {
     }
   }
 
-  // TODO: Cache
-  // async getPostComments(postId: string, page: Pagination): Promise<GetPostCommentsResponseDto> {
   async getPostComments(postId: string, pageOptionsDto: PageOptionsDto) {
     try {
       const isExist = await this.postRepository.isExist(postId);

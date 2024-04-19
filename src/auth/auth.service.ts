@@ -8,8 +8,8 @@ import { JwtService } from '@nestjs/jwt';
 import { verify } from 'argon2';
 
 import { LoginResponseDto, RefreshTokenResponseDto } from './dto';
-import { UserRepository } from 'src/user/user.repository';
-import { User } from 'src/user/user.entity';
+import { UserRepository } from 'src//modules/user/user.repository';
+import { User } from 'src//modules/user/user.entity';
 
 @Injectable()
 export class AuthService {

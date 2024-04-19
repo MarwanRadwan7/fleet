@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostService } from './post.service';
 import { PostController } from './post.controller';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
-import { UserModule } from 'src/user/user.module';
+import { UserModule } from 'src//modules/user/user.module';
 import { PostRepository } from './post.repository';
 import { Post } from './post.entity';
 import { LikeModule } from 'src/like/like.module';

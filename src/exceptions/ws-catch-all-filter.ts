@@ -1,5 +1,5 @@
 import { ArgumentsHost, BadRequestException, Catch, ExceptionFilter } from '@nestjs/common';
-import { SocketWithAuth } from 'src/types';
+import { SocketWithAuth } from 'src/common/types';
 import { WsBadRequestException, WsTypeException, WsUnknownException } from './ws-exceptions';
 
 @Catch()

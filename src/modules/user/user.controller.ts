@@ -12,6 +12,7 @@ import {
   UploadedFile,
   ClassSerializerInterceptor,
   Query,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -28,13 +29,12 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
 import { UserService } from './user.service';
 import { JwtGuard } from 'src/auth/guard';
 import { ParsePipe, SharpTransformPipe } from 'src/common/pipe';
-
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { GetPostsByUserResponseDto, GetPostsByUserResponseDtoExample } from 'src/modules/post/dto';
 import { PostService } from 'src//modules/post/post.service';
 import {
@@ -51,19 +51,22 @@ import {
 } from './dto';
 import { PageOptionsDto } from 'src/common/dto/pagination';
 
-@ApiTags('User')
 @Controller('users')
+@UseInterceptors(CacheInterceptor)
 @UseGuards(ThrottlerGuard)
+@ApiTags('User')
 export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly postService: PostService,
-    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   @Post('/')
   @ApiOperation({ summary: 'Register a new user' })
-  @ApiCreatedResponse({ description: 'user created successfully', type: CreateUserResponseExample })
+  @ApiCreatedResponse({
+    description: 'user registered successfully',
+    type: CreateUserResponseExample,
+  })
   @ApiConflictResponse({ description: 'email or username address already registered' })
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
@@ -79,14 +82,12 @@ export class UserController {
     avatar: Express.Multer.File,
     @Body() payload: CreateUserDto,
   ) {
-    let user: UserDto;
-    if (avatar) {
-      payload['avatar'] = (await this.cloudinaryService.uploadFile(avatar)).secure_url;
-      user = await this.userService.register(payload);
-    } else {
-      user = await this.userService.register(payload);
-    }
-    return { statusCode: 201, message: 'user created successfully', data: { user } };
+    const user = await this.userService.register(payload, avatar);
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'user registered successfully',
+      data: { user },
+    };
   }
 
   @Patch('/:user_id')
@@ -104,10 +105,11 @@ export class UserController {
   })
   async update(@Param('user_id') userId: string, @Body() payload: UpdateUserDto) {
     const user: any = await this.userService.update(userId, payload);
-    return { statusCode: 200, message: 'user updated successfully', data: { user } };
+    return { statusCode: HttpStatus.OK, message: 'user updated successfully', data: { user } };
   }
 
   @Get('/:user_id')
+  @CacheTTL(20_000)
   @UseGuards(JwtGuard)
   // @UseInterceptors(ClassSerializerInterceptor)
   @ApiSecurity('JWT-auth')
@@ -121,10 +123,11 @@ export class UserController {
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async get(@Param('user_id') user_id: string) {
     const user: UserDto = await this.userService.getById(user_id);
-    return { statusCode: 200, message: 'user retrieved successfully', data: { user } };
+    return { statusCode: HttpStatus.OK, message: 'user retrieved successfully', data: { user } };
   }
 
   @Get('/:user_id/followers')
+  @CacheTTL(20_000)
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: "Gets an existing user's followers" })
@@ -143,10 +146,15 @@ export class UserController {
       userId,
       pageOptionsDto,
     );
-    return { statusCode: 200, message: 'followers retrieved successfully', data: { ...followers } };
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'followers retrieved successfully',
+      data: { ...followers },
+    };
   }
 
   @Get('/:user_id/followings')
+  @CacheTTL(20_000)
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: "Gets an existing user's followings" })
@@ -173,6 +181,7 @@ export class UserController {
   }
 
   @Get('/:user_id/posts')
+  @CacheTTL(10_000)
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: "Gets an existing user 's posts" })
@@ -188,9 +197,15 @@ export class UserController {
       userId,
       pageOptionsDto,
     );
-    return { statusCode: 200, message: 'posts retrieved successfully', data: { ...posts } };
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'posts retrieved successfully',
+      data: { ...posts },
+    };
   }
 
+  @Delete('/:user_id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: "Deactivates an existing user 's account" })
@@ -198,9 +213,6 @@ export class UserController {
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
   @ApiNotFoundResponse({ description: 'user not found' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
-  @Delete('/:user_id')
-  @UseGuards(JwtGuard)
-  @HttpCode(204)
   async delete(@Param('user_id') userId: string) {
     await this.userService.deactivate(userId);
   }

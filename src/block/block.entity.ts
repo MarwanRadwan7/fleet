@@ -1,6 +1,6 @@
 import { Column, Entity, Unique, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import { User } from 'src/user/user.entity';
+import { User } from 'src//modules/user/user.entity';
 
 @Entity({ name: 'blocks' })
 @Unique('unique_block', ['userId', 'friendId'])

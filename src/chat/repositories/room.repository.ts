@@ -3,7 +3,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Room } from '../entities';
-import { User } from 'src/user/user.entity';
+import { User } from 'src//modules/user/user.entity';
 
 @Injectable()
 export class RoomRepository {

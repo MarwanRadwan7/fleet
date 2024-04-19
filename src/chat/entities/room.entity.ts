@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, ManyToMany, JoinTable, OneToMany, Column } from 'typeorm';
 
 import { Message } from './message.entity';
-import { User } from 'src/user/user.entity';
+import { User } from 'src//modules/user/user.entity';
 import { Exclude } from 'class-transformer';
 
 @Entity({

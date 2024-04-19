@@ -6,7 +6,7 @@ import { ChatController } from './chat.controller';
 import { MessageRepository, RoomRepository } from './repositories';
 import { Message, Room } from './entities';
 import { ChatGateway } from './chat.gateway';
-import { UserModule } from 'src/user/user.module';
+import { UserModule } from 'src//modules/user/user.module';
 
 @Module({
   imports: [

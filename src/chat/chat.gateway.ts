@@ -13,10 +13,10 @@ import { Namespace } from 'socket.io';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
-import { SocketWithAuth } from 'src/types';
+import { SocketWithAuth } from 'src/common/types';
 import { ChatService } from './chat.service';
 import { WsBadRequestException } from 'src/exceptions';
-import { UserRepository } from 'src/user/user.repository';
+import { UserRepository } from 'src//modules/user/user.repository';
 import { WsCatchAllFilter } from 'src/exceptions/ws-catch-all-filter';
 import { CreatePrivateMessageDto, JoinRoomDto } from './dto';
 

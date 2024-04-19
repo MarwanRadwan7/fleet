@@ -11,16 +11,21 @@ import { UserRepository } from './user.repository';
 import { FollowRepository } from 'src/follow/follow.repository';
 import { PageOptionsDto } from 'src/common/dto/pagination';
 import { CreateUserDto, GetUserFollowingsResponseDto, UpdateUserDto, UserDto } from './dto';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly followRepository: FollowRepository,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  async register(user: CreateUserDto): Promise<UserDto> {
+  async register(user: CreateUserDto, media?: Express.Multer.File): Promise<UserDto> {
     try {
+      if (media) {
+        user.avatar = (await this.cloudinaryService.uploadFile(media)).secure_url;
+      }
       const res = await this.userRepository.create(user);
       return res;
     } catch (err) {
@@ -73,7 +78,6 @@ export class UserService {
     }
   }
 
-  // async getUserFollowers(userId: string, page: Pagination): Promise<GetUserFollowersResponseDto> {
   async getUserFollowers(userId: string, pageOptionsDto: PageOptionsDto) {
     try {
       const isExist = await this.userRepository.isExist(userId);
@@ -89,7 +93,6 @@ export class UserService {
     }
   }
 
-  // async getUserFollowings(userId: string, page: Pagination): Promise<GetUserFollowingsResponseDto> {
   async getUserFollowings(
     userId: string,
     pageOptionsDto: PageOptionsDto,

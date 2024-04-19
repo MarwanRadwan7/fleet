@@ -10,7 +10,7 @@ import {
 import { Exclude } from 'class-transformer';
 import { randomInt } from 'crypto';
 
-import { User } from 'src/user/user.entity';
+import { User } from 'src//modules/user/user.entity';
 import { PostLike } from 'src/like/like.entity';
 import { PostComment } from 'src/comment/comment.entity';
 

@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Message, Room } from '../entities';
-import { User } from 'src/user/user.entity';
+import { User } from 'src//modules/user/user.entity';
 import { PageOptionsDto } from 'src/common/dto/pagination';
 
 @Injectable()

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { Post } from '../post.entity';
-import { User } from 'src/user/user.entity';
+import { User } from 'src//modules/user/user.entity';
 import { PostComment } from 'src/comment/comment.entity';
 
 // Response Types

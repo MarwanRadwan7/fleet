@@ -1,7 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
 import { PostLike } from 'src/like/like.entity';
 
-import { User } from 'src/user/user.entity';
+import { User } from 'src//modules/user/user.entity';
 
 export class PostDto {
   @Expose()

@@ -7,9 +7,9 @@ import {
 import { PostgresError } from 'pg-error-enum';
 
 import { Message, Room } from './entities';
-import { SocketWithAuth } from 'src/types';
-import { User } from 'src/user/user.entity';
-import { UserRepository } from 'src/user/user.repository';
+import { SocketWithAuth } from 'src/common/types';
+import { User } from 'src//modules/user/user.entity';
+import { UserRepository } from 'src//modules/user/user.repository';
 import { MessageRepository, RoomRepository } from './repositories';
 import {
   CreatePrivateMessageDto,

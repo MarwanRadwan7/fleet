@@ -6,7 +6,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { redisStore } from 'cache-manager-redis-yet';
 import { CacheModule } from '@nestjs/cache-manager';
 
-import { UserModule } from './user/user.module';
+import { UserModule } from './/modules/user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { PostModule } from './modules/post/post.module';
 import { FollowModule } from './follow/follow.module';
