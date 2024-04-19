@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { PostLike } from 'src/like/like.entity';
+import { PostLike } from 'src/modules/like/like.entity';
 
 import { User } from 'src//modules/user/user.entity';
 

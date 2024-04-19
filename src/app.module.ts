@@ -11,7 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { PostModule } from './modules/post/post.module';
 import { FollowModule } from './follow/follow.module';
 import { BlockModule } from './block/block.module';
-import { LikeModule } from './like/like.module';
+import { LikeModule } from './modules/like/like.module';
 import { CommentModule } from './comment/comment.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { FeedModule } from './feed/feed.module';

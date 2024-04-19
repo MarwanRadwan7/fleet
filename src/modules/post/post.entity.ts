@@ -11,7 +11,7 @@ import { Exclude } from 'class-transformer';
 import { randomInt } from 'crypto';
 
 import { User } from 'src//modules/user/user.entity';
-import { PostLike } from 'src/like/like.entity';
+import { PostLike } from 'src/modules/like/like.entity';
 import { PostComment } from 'src/comment/comment.entity';
 
 @Entity({ name: 'posts' })

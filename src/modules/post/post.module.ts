@@ -8,7 +8,7 @@ import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { UserModule } from 'src//modules/user/user.module';
 import { PostRepository } from './post.repository';
 import { Post } from './post.entity';
-import { LikeModule } from 'src/like/like.module';
+import { LikeModule } from 'src/modules/like/like.module';
 import { CommentModule } from 'src/comment/comment.module';
 
 @Module({

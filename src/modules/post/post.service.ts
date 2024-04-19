@@ -8,7 +8,7 @@ import {
 import { CreatePostDto, UpdatePostDto, PostDto } from './dto';
 import { PostRepository } from './post.repository';
 import { UserRepository } from 'src//modules/user/user.repository';
-import { LikeRepository } from 'src/like/like.repository';
+import { LikeRepository } from 'src/modules/like/like.repository';
 import { CommentRepository } from 'src/comment/comment.repository';
 import { PageOptionsDto } from 'src/common/dto/pagination';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';

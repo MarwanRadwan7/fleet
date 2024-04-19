@@ -12,7 +12,7 @@ import { Exclude } from 'class-transformer';
 import { Room } from 'src/chat/entities';
 import { Post } from 'src//modules/post/post.entity';
 import { Block } from 'src/block/block.entity';
-import { PostLike } from 'src/like/like.entity';
+import { PostLike } from 'src/modules/like/like.entity';
 import { Follower, Following } from 'src/follow/follow.entity';
 
 export enum UserRole {
