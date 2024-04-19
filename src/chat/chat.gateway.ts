@@ -92,7 +92,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   @SubscribeMessage('msg_priv_to_server')
   async handlePrivateMessage(client: SocketWithAuth, payload: CreatePrivateMessageDto) {
-    // Save the message in the db and populate the private room data
+    // Save the message in the db and populate the private room data.
+    // If there is an err in the payload it will be handled in the service.
     const createdMessage = await this.chatService.createMessage(client.userID, payload);
 
     // Response object

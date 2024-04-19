@@ -200,6 +200,7 @@ export class ChatService {
       await this.messageRepository.delete(msgId);
     } catch (err) {
       console.error(err);
+      if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException();
     }
   }
