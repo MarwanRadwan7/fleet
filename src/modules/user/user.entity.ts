@@ -13,6 +13,7 @@ import { Room } from 'src/modules/chat/entities';
 import { Post } from 'src//modules/post/post.entity';
 import { Block } from 'src/modules/block/block.entity';
 import { PostLike } from 'src/modules/like/like.entity';
+import { PostComment } from '../comment/comment.entity';
 import { Follower, Following } from 'src/modules/follow/follow.entity';
 
 export enum UserRole {
@@ -120,10 +121,13 @@ export class User {
   public updatedAt: Date;
 
   // Relations
-  @OneToMany(() => Following, following => following.userId)
+  @OneToMany(() => PostComment, comments => comments.userId)
+  comments: PostComment[];
+
+  @OneToMany(() => Following, followings => followings.userId)
   followings: Following[];
 
-  @OneToMany(() => Follower, follower => follower.userId)
+  @OneToMany(() => Follower, followers => followers.userId)
   followers: Follower[];
 
   @OneToMany(() => Post, posts => posts.userId)
@@ -135,6 +139,6 @@ export class User {
   @OneToMany(() => PostLike, likes => likes.userId)
   likes: PostLike[];
 
-  @ManyToMany(() => Room, room => room.members)
+  @ManyToMany(() => Room, rooms => rooms.members)
   rooms: Room[];
 }
