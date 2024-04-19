@@ -12,6 +12,7 @@ import {
   UploadedFile,
   UseInterceptors,
   Query,
+  HttpStatus,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -28,11 +29,11 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 
 import { PostService } from './post.service';
 import { JwtGuard } from 'src/auth/guard';
 import { ParsePipe, SharpTransformPipe } from 'src/common/pipe';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import {
   CreatePostDto,
   CreatePostResponseDtoExample,
@@ -48,13 +49,11 @@ import {
 import { PageOptionsDto } from 'src/common/dto/pagination';
 
 @Controller('posts')
+@UseInterceptors(CacheInterceptor)
 @ApiTags('Posts')
 @UseGuards(ThrottlerGuard)
 export class PostController {
-  constructor(
-    private readonly postService: PostService,
-    private readonly cloudinaryService: CloudinaryService,
-  ) {}
+  constructor(private readonly postService: PostService) {}
 
   @Post('/')
   @UseGuards(JwtGuard)
@@ -80,18 +79,8 @@ export class PostController {
     @Body()
     payload: CreatePostDto,
   ) {
-    const userId: string = req.user.userID;
-    let post: PostDto;
-    payload.mediaUrl = null;
-
-    if (media) {
-      payload.mediaUrl = (await this.cloudinaryService.uploadFile(media)).secure_url;
-      post = await this.postService.create(userId, payload);
-    } else {
-      post = await this.postService.create(userId, payload);
-    }
-
-    return { statusCode: 201, message: 'post created successfully', data: { post } };
+    const post = await this.postService.create(req.user.userID, payload, media);
+    return { statusCode: HttpStatus.CREATED, message: 'post created successfully', data: { post } };
   }
 
   @Patch('/:post_id')
@@ -110,10 +99,11 @@ export class PostController {
     const payload: UpdatePostDto = { ...postBody };
     const post = await this.postService.update(postId, payload);
 
-    return { statusCode: 200, message: 'post updated successfully', data: { post } };
+    return { statusCode: HttpStatus.OK, message: 'post updated successfully', data: { post } };
   }
 
   @Get('/:post_id')
+  @CacheTTL(30_000)
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: 'Gets an existing post' })
@@ -123,10 +113,11 @@ export class PostController {
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   async getById(@Req() req, @Param('post_id') postId: string) {
     const post: PostDto = await this.postService.getById(postId);
-    return { statusCode: 200, message: 'post retrieved successfully', data: { post } };
+    return { statusCode: HttpStatus.OK, message: 'post retrieved successfully', data: { post } };
   }
 
   @Get('/:post_id/likes')
+  @CacheTTL(30_000)
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: 'Gets likes info on an existing post' })
@@ -142,10 +133,15 @@ export class PostController {
       postId,
       pageOptionsDto,
     );
-    return { statusCode: 200, message: 'likes retrieved successfully', data: { ...likes } };
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'likes retrieved successfully',
+      data: { ...likes },
+    };
   }
 
   @Get('/:post_id/comments')
+  @CacheTTL(30_000)
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: 'Gets comments info on an existing post' })
@@ -161,10 +157,15 @@ export class PostController {
       postId,
       pageOptionsDto,
     );
-    return { statusCode: 200, message: 'comments retrieved successfully', data: { ...comments } };
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'comments retrieved successfully',
+      data: { ...comments },
+    };
   }
 
   @Delete('/:post_id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: 'Deletes an existing post' })
@@ -172,7 +173,6 @@ export class PostController {
   @ApiNotFoundResponse({ description: 'post not found' })
   @ApiUnauthorizedResponse({ description: 'unauthorized' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
-  @HttpCode(204)
   async delete(@Param('post_id') postId: string) {
     await this.postService.delete(postId);
   }

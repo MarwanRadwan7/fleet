@@ -11,6 +11,7 @@ import { UserRepository } from 'src/user/user.repository';
 import { LikeRepository } from 'src/like/like.repository';
 import { CommentRepository } from 'src/comment/comment.repository';
 import { PageOptionsDto } from 'src/common/dto/pagination';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class PostService {
@@ -19,13 +20,22 @@ export class PostService {
     private readonly userRepository: UserRepository,
     private readonly likeRepository: LikeRepository,
     private readonly commentRepository: CommentRepository,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  async create(userId: string, payload: CreatePostDto): Promise<PostDto> {
+  async create(
+    userId: string,
+    payload: CreatePostDto,
+    media?: Express.Multer.File,
+  ): Promise<PostDto> {
     try {
       const user = await this.userRepository.isExist(userId);
       if (!user) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
 
+      // Check if the user uploaded a pic on the req.
+      if (media) {
+        payload.mediaUrl = (await this.cloudinaryService.uploadFile(media)).secure_url;
+      }
       const post = await this.postRepository.create(userId, payload);
 
       return post;
