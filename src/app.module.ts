@@ -39,12 +39,11 @@ import typeorm from './config/typeorm';
       useFactory: async () => ({
         store: await redisStore({
           socket: {
-            host: 'localhost',
-            port: 6379,
+            host: process.env.REDIS_HOST,
+            port: parseInt(process.env.REDIS_PORT),
           },
         }),
       }),
-      // ttl: 10_000birthDate, // in milliseconds
     }),
     UserModule,
     AuthModule,
