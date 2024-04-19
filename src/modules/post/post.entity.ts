@@ -12,7 +12,7 @@ import { randomInt } from 'crypto';
 
 import { User } from 'src//modules/user/user.entity';
 import { PostLike } from 'src/modules/like/like.entity';
-import { PostComment } from 'src/comment/comment.entity';
+import { PostComment } from 'src/modules/comment/comment.entity';
 
 @Entity({ name: 'posts' })
 @Index('idx_posts_user_id', ['userId'])

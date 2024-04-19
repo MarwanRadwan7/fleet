@@ -9,7 +9,7 @@ import { UserModule } from 'src//modules/user/user.module';
 import { PostRepository } from './post.repository';
 import { Post } from './post.entity';
 import { LikeModule } from 'src/modules/like/like.module';
-import { CommentModule } from 'src/comment/comment.module';
+import { CommentModule } from 'src/modules/comment/comment.module';
 
 @Module({
   imports: [
