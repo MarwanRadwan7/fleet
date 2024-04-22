@@ -102,6 +102,7 @@ Table rooms {
   updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
 }
 
+// for the many-to-many relation
 Table room_members {
   room_id UUID [not null]
   user_id UUID [not null]
@@ -134,6 +135,6 @@ enum ROLE {
   Ref: messages.author_id < users.id [delete: cascade, update: cascade]
   Ref: messages.room_id < rooms.id  [delete: cascade, update: cascade]
   Ref:room_members.room_id <> rooms.id [delete: cascade, update: cascade]
-  Ref:room_members.user_id <> posts.id [delete: cascade, update: cascade]
+  Ref:room_members.user_id <> users.id [delete: cascade, update: cascade]
   Ref: followings.user_id > users.id [delete: cascade, update: cascade]
   Ref: followings.following_id > users.id [delete: cascade, update: cascade]

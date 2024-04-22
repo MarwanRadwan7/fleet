@@ -1,0 +1,2801 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/users": {
+      "post": {
+        "operationId": "UserController_register",
+        "summary": "Register a new user",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "user registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUserResponseExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "409": {
+            "description": "email or username address already registered"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["User"]
+      }
+    },
+    "/users/{user_id}": {
+      "patch": {
+        "operationId": "UserController_update",
+        "summary": "Updates an existing user",
+        "parameters": [
+          {
+            "name": "user_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "user updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserResponseDtoExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "user not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["User"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "UserController_get",
+        "summary": "Gets an existing user by ID",
+        "parameters": [
+          {
+            "name": "user_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "user retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserResponseDtoExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "user not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["User"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "UserController_delete",
+        "summary": "Deactivates an existing user 's account",
+        "parameters": [
+          {
+            "name": "user_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "user not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["User"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/users/{user_id}/followers": {
+      "get": {
+        "operationId": "UserController_getUserFollowers",
+        "summary": "Gets an existing user's followers",
+        "parameters": [
+          {
+            "name": "order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "DESC",
+              "enum": ["ASC", "DESC"],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "user_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "followers retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserFollowersResponseDtoExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "user not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["User"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/users/{user_id}/followings": {
+      "get": {
+        "operationId": "UserController_getUserFollowings",
+        "summary": "Gets an existing user's followings",
+        "parameters": [
+          {
+            "name": "order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "DESC",
+              "enum": ["ASC", "DESC"],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "user_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "followings retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserFollowingsResponseDtoExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "user not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["User"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/users/{user_id}/posts": {
+      "get": {
+        "operationId": "UserController_getUserPosts",
+        "summary": "Gets an existing user 's posts",
+        "parameters": [
+          {
+            "name": "order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "DESC",
+              "enum": ["ASC", "DESC"],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "user_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "posts retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPostsByUserResponseDtoExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "user not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["User"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/follow": {
+      "post": {
+        "operationId": "FollowController_follow",
+        "summary": "Follows a user",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFollowDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "user followed successfully"
+          },
+          "400": {
+            "description": "you cannot follow yourself"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "user not fount"
+          },
+          "409": {
+            "description": "you are blocked. you cannot follow this user"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Follow"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/follow/{user_id}": {
+      "delete": {
+        "operationId": "FollowController_unFollow",
+        "summary": "Unfollow a user",
+        "parameters": [
+          {
+            "name": "user_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "user unfollowed successfully"
+          },
+          "400": {
+            "description": "you cannot unfollow yourself"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "user not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Follow"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/block": {
+      "post": {
+        "operationId": "BlockController_block",
+        "summary": "Blocks an existing user",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBlockDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "user blocked successfully"
+          },
+          "400": {
+            "description": "you cannot block yourself"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "user not found"
+          },
+          "409": {
+            "description": "user is already blocked"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Block"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/block/{friend_id}": {
+      "delete": {
+        "operationId": "BlockController_unBlock",
+        "summary": "Unblock a user",
+        "parameters": [
+          {
+            "name": "friend_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "user unblocked successfully"
+          },
+          "400": {
+            "description": "you cannot unblock yourself"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "user not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Block"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/posts": {
+      "post": {
+        "operationId": "PostController_create",
+        "summary": "Creates a new post",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePostDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "post created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePostResponseDtoExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "user not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Posts"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/posts/{post_id}": {
+      "patch": {
+        "operationId": "PostController_update",
+        "summary": "Updates an existing post",
+        "parameters": [
+          {
+            "name": "post_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePostDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "post updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePostResponseDtoExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "post not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Posts"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "PostController_getById",
+        "summary": "Gets an existing post",
+        "parameters": [
+          {
+            "name": "post_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "post retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPostResponseDtoExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "post not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Posts"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "PostController_delete",
+        "summary": "Deletes an existing post",
+        "parameters": [
+          {
+            "name": "post_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "post deleted successfully"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "post not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Posts"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/posts/{post_id}/likes": {
+      "get": {
+        "operationId": "PostController_getPostLikes",
+        "summary": "Gets likes info on an existing post",
+        "parameters": [
+          {
+            "name": "order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "DESC",
+              "enum": ["ASC", "DESC"],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "post_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "likes retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPostLikesResponseDtoExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "post not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Posts"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/posts/{post_id}/comments": {
+      "get": {
+        "operationId": "PostController_getPostComments",
+        "summary": "Gets comments info on an existing post",
+        "parameters": [
+          {
+            "name": "order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "DESC",
+              "enum": ["ASC", "DESC"],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "post_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "comments retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPostCommentsResponseDtoExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "post not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Posts"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/like": {
+      "post": {
+        "operationId": "LikeController_like",
+        "summary": "Likes a post",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLikePostDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "like created successfully"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "user or post not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Like"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/comments": {
+      "post": {
+        "operationId": "CommentController_create",
+        "summary": "Creates a comment on a post",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCommentPostDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "comment created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCommentPostResponseDtoExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "post not fount"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Comments"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/comments/{comment_id}": {
+      "patch": {
+        "operationId": "CommentController_update",
+        "summary": "Updates a comment on a post",
+        "parameters": [
+          {
+            "name": "comment_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCommentPostDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "comment updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCommentPostResponseDtoExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "post not fount"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Comments"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "CommentController_get",
+        "summary": "Gets a comment on a post",
+        "parameters": [
+          {
+            "name": "comment_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "comment retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCommentPostResponseDtoExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "post not fount"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Comments"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "CommentController_comment",
+        "summary": "Deletes an existing comment on post",
+        "parameters": [
+          {
+            "name": "comment_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "comment deleted successfully"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "comment not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Comments"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "summary": "login for an existing post",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "invalid password"
+          },
+          "403": {
+            "description": "account is deactivated"
+          },
+          "404": {
+            "description": "user not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/refresh-token": {
+      "post": {
+        "operationId": "AuthController_refreshToken",
+        "summary": "Get a new access_token for a previous authorized user",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshTokenResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Auth"]
+      }
+    },
+    "/feed": {
+      "get": {
+        "operationId": "FeedController_feed",
+        "summary": "Gets the feed of the logged in user",
+        "parameters": [
+          {
+            "name": "order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "DESC",
+              "enum": ["ASC", "DESC"],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "feed retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFeedResponseDtoExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "user not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Feed"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/feed/top": {
+      "get": {
+        "operationId": "FeedController_top",
+        "summary": "Gets top 30 posts on the platform based on interactions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "feed retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTopFeedResponseDtoExample"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Feed"]
+      }
+    },
+    "/feed/hashtags": {
+      "get": {
+        "operationId": "FeedController_postsByHashtags",
+        "summary": "Gets posts related to hashtags",
+        "parameters": [
+          {
+            "name": "order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "DESC",
+              "enum": ["ASC", "DESC"],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "hashtags",
+            "required": true,
+            "in": "query",
+            "example": "?hashtags=webdev&hashtags=programming&hashtags=life",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "feed retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPostsByHashtagsResponseDtoExample"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Feed"]
+      }
+    },
+    "/chat/rooms/private": {
+      "post": {
+        "operationId": "ChatController_createPrivateRoom",
+        "summary": "Creates a new private chat room",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePrivateRoomDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "private chat room created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePrivateRoomRespExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "user not found"
+          },
+          "409": {
+            "description": "private room already exist"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Chats"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/chat/rooms/public": {
+      "post": {
+        "operationId": "ChatController_createPublicRoom",
+        "summary": "Creates a new public chat room",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "The name of the public chat room",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePublicRoomDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "public chat room created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePublicRoomRespExample"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "409": {
+            "description": "public room already exist"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Chats"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/chat/rooms": {
+      "get": {
+        "operationId": "ChatController_findAllRooms",
+        "summary": "Get all user's chat rooms",
+        "parameters": [
+          {
+            "name": "order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "DESC",
+              "enum": ["ASC", "DESC"],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "chat rooms retrieved successfully"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Chats"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/chat/rooms/{room_id}/messages": {
+      "get": {
+        "operationId": "ChatController_findRoomMessages",
+        "summary": "Get chat room's messages",
+        "parameters": [
+          {
+            "name": "room_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "DESC",
+              "enum": ["ASC", "DESC"],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "room messages retrieved successfully"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Chats"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/chat/messages/{message_id}": {
+      "patch": {
+        "operationId": "ChatController_updateMessage",
+        "summary": "Updates a chat messages",
+        "parameters": [
+          {
+            "name": "message_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The content of the message",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMessageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "message updated successfully"
+          },
+          "400": {
+            "description": "message does not belong to this user"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "message not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Chats"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "ChatController_deleteMessage",
+        "summary": "Deletes a chat messages",
+        "parameters": [
+          {
+            "name": "message_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "description": "message does not belong to this user"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "message not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Chats"],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Fleet",
+    "description": "API Documentation for Fleet",
+    "version": "1.0",
+    "contact": {},
+    "license": {
+      "name": "MIT",
+      "url": ""
+    }
+  },
+  "tags": [],
+  "servers": [
+    {
+      "url": "http://localhost:8080/api/v1/",
+      "description": "Local environment"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "JWT-auth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "name": "JWT",
+        "description": "Enter JWT token",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "pattern": "/^[a-zA-Z0-9]([._-](?![._-])|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$/",
+            "example": "example",
+            "description": "username of the user"
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 64,
+            "example": "example",
+            "description": "first name of the user"
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 64,
+            "example": "example",
+            "description": "last name of the user"
+          },
+          "email": {
+            "type": "string",
+            "example": "user@example.com",
+            "description": "email of the user"
+          },
+          "phone": {
+            "type": "string",
+            "example": "0123456789",
+            "description": "phone of the user"
+          },
+          "avatar": {
+            "type": "string",
+            "example": "photo.jpg",
+            "description": "photo of the user",
+            "default": "default.png"
+          },
+          "password": {
+            "type": "string",
+            "example": "password",
+            "description": "password of the user"
+          },
+          "birthDate": {
+            "type": "string",
+            "example": "2024-01-01T12:30:45Z",
+            "description": "birth date of the user on  ISO 8601 format"
+          }
+        },
+        "required": ["username", "firstName", "lastName", "email", "phone", "password", "birthDate"]
+      },
+      "CreateUserResponseExample": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "01ac844b-1c1d-4676-abe1-efa90b0428e0"
+          },
+          "username": {
+            "type": "string",
+            "example": "example"
+          },
+          "email": {
+            "type": "string",
+            "example": "user@example.com"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "example"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "example"
+          },
+          "phone": {
+            "type": "string",
+            "example": "0123456789"
+          },
+          "avatar": {
+            "type": "string",
+            "example": "photo.jpg"
+          },
+          "birthDate": {
+            "type": "string",
+            "example": "2024-01-01T12:30:45Z"
+          },
+          "bio": {
+            "type": "string",
+            "example": "null"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-01-01T12:30:45Z"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "email",
+          "firstName",
+          "lastName",
+          "phone",
+          "avatar",
+          "birthDate",
+          "bio",
+          "createdAt"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "example",
+            "description": "username of the user"
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 64,
+            "example": "example",
+            "description": "first name of the user"
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 64,
+            "example": "example",
+            "description": "last name of the user"
+          },
+          "email": {
+            "type": "string",
+            "example": "user@example.com",
+            "description": "email of the user"
+          },
+          "phone": {
+            "type": "string",
+            "example": "0123456789",
+            "description": "phone of the user"
+          },
+          "password": {
+            "type": "string",
+            "example": "password",
+            "description": "password of the user"
+          },
+          "birthDate": {
+            "type": "string",
+            "example": "2024-01-01T12:30:45Z",
+            "description": "birthdate of the user on  ISO 8601 format"
+          },
+          "bio": {
+            "type": "string",
+            "example": "example",
+            "description": "bio of the user profile"
+          }
+        }
+      },
+      "UpdateUserResponseDtoExample": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "01ac844b-1c1d-4676-abe1-efa90b0428e0"
+          },
+          "username": {
+            "type": "string",
+            "example": "example"
+          },
+          "email": {
+            "type": "string",
+            "example": "user@example.com"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "example"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "example"
+          },
+          "phone": {
+            "type": "string",
+            "example": "0123456789"
+          },
+          "avatar": {
+            "type": "string",
+            "example": "photo.jpg"
+          },
+          "birthDate": {
+            "type": "string",
+            "example": "2024-01-01T12:30:45Z"
+          },
+          "bio": {
+            "type": "string",
+            "example": "null"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-01-01T12:30:45Z"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "email",
+          "firstName",
+          "lastName",
+          "phone",
+          "avatar",
+          "birthDate",
+          "bio",
+          "createdAt"
+        ]
+      },
+      "GetUserResponseDtoExample": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "01ac844b-1c1d-4676-abe1-efa90b0428e0"
+          },
+          "username": {
+            "type": "string",
+            "example": "example"
+          },
+          "email": {
+            "type": "string",
+            "example": "user@example.com"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "example"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "example"
+          },
+          "phone": {
+            "type": "string",
+            "example": "0123456789"
+          },
+          "avatar": {
+            "type": "string",
+            "example": "photo.jpg"
+          },
+          "birthDate": {
+            "type": "string",
+            "example": "2024-01-01T12:30:45Z"
+          },
+          "bio": {
+            "type": "string",
+            "example": "null"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-01-01T12:30:45Z"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "email",
+          "firstName",
+          "lastName",
+          "phone",
+          "avatar",
+          "birthDate",
+          "bio",
+          "createdAt"
+        ]
+      },
+      "GetUserFollowersResponseDtoExample": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "example": 1
+          },
+          "followers": {
+            "type": "object",
+            "example": {
+              "userId": "6fcb4875-c4dc-4c8f-b15f-06f9fd8c18e8",
+              "username": "example",
+              "name": "example",
+              "avatar": "default.png"
+            }
+          }
+        },
+        "required": ["count", "followers"]
+      },
+      "GetUserFollowingsResponseDtoExample": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "example": 1
+          },
+          "followings": {
+            "type": "object",
+            "example": {
+              "userId": "6fcb4875-c4dc-4c8f-b15f-06f9fd8c18e8",
+              "username": "example",
+              "name": "example",
+              "avatar": "default.png"
+            }
+          }
+        },
+        "required": ["count", "followings"]
+      },
+      "GetPostsByUserResponseDtoExample": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "example": 1
+          },
+          "posts": {
+            "example": {
+              "id": "747377339-5a30-4e5e-830f-dfb88we1fb",
+              "slug": "123456789",
+              "content": "example",
+              "mediaUrl": "example.com/default.png",
+              "hashtags": "pets,cats,life",
+              "tags": "user1,user2",
+              "lat": "90",
+              "lng": "90",
+              "isEdited": false,
+              "createdAt": "2024-01-01T15:19:19.688Z",
+              "updatedAt": "2024-01-01T15:19:19.688Z",
+              "likesCount": 1,
+              "commentsCount": 1
+            },
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["count", "posts"]
+      },
+      "CreateFollowDto": {
+        "type": "object",
+        "properties": {
+          "followingId": {
+            "type": "string",
+            "example": "cc0dee72-7d82-4310-bdd9-b9babb141f87"
+          }
+        },
+        "required": ["followingId"]
+      },
+      "CreateBlockDto": {
+        "type": "object",
+        "properties": {
+          "blockedId": {
+            "type": "string"
+          }
+        },
+        "required": ["blockedId"]
+      },
+      "CreatePostDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "example": "example",
+            "description": "content of the post"
+          },
+          "mediaUrl": {
+            "type": "string",
+            "example": "https://example.com/default.png",
+            "description": "media of the post"
+          },
+          "tags": {
+            "type": "string",
+            "example": "example",
+            "description": "mentions on the post"
+          },
+          "lat": {
+            "type": "string",
+            "example": 90,
+            "description": "latitude of the location of the post"
+          },
+          "lng": {
+            "type": "string",
+            "example": 90,
+            "description": "longitude of the location of the post"
+          }
+        },
+        "required": ["content", "mediaUrl", "tags", "lat", "lng"]
+      },
+      "CreatePostResponseDtoExample": {
+        "type": "object",
+        "properties": {
+          "post": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "required": true,
+                "type": "string"
+              },
+              "userId": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "required": true,
+                    "type": "string"
+                  }
+                }
+              },
+              "slug": {
+                "required": true,
+                "type": "string"
+              },
+              "content": {
+                "required": true,
+                "type": "string"
+              },
+              "mediaUrl": {
+                "required": true,
+                "type": "string"
+              },
+              "hashtags": {
+                "required": true,
+                "type": "string"
+              },
+              "tags": {
+                "required": true,
+                "type": "string"
+              },
+              "lat": {
+                "required": true,
+                "type": "string"
+              },
+              "lng": {
+                "required": true,
+                "type": "string"
+              },
+              "isEdited": {
+                "required": true,
+                "type": "boolean"
+              },
+              "createdAt": {
+                "format": "date-time",
+                "required": true,
+                "type": "string"
+              },
+              "updatedAt": {
+                "format": "date-time",
+                "required": true,
+                "type": "string"
+              },
+              "likesCount": {
+                "required": true,
+                "type": "number"
+              },
+              "commentsCount": {
+                "required": true,
+                "type": "number"
+              }
+            }
+          }
+        },
+        "required": ["post"]
+      },
+      "UpdatePostDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "example": "example",
+            "description": "content of the post"
+          },
+          "tags": {
+            "type": "string",
+            "example": "example",
+            "description": "mentions on the post"
+          },
+          "lat": {
+            "type": "string",
+            "example": 90,
+            "description": "latitude of the location of the post"
+          },
+          "lng": {
+            "type": "string",
+            "example": 90,
+            "description": "longitude of the location of the post"
+          }
+        }
+      },
+      "UpdatePostResponseDtoExample": {
+        "type": "object",
+        "properties": {
+          "post": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "required": true,
+                "type": "string"
+              },
+              "userId": {
+                "required": true,
+                "type": "string"
+              },
+              "slug": {
+                "required": true,
+                "type": "string"
+              },
+              "content": {
+                "required": true,
+                "type": "string"
+              },
+              "mediaUrl": {
+                "required": true,
+                "type": "string"
+              },
+              "hashtags": {
+                "required": true,
+                "type": "string"
+              },
+              "tags": {
+                "required": true,
+                "type": "string"
+              },
+              "lat": {
+                "required": true,
+                "type": "number"
+              },
+              "lng": {
+                "required": true,
+                "type": "number"
+              },
+              "isEdited": {
+                "required": true,
+                "type": "boolean"
+              },
+              "created_at": {
+                "format": "date-time",
+                "required": true,
+                "type": "string"
+              },
+              "updatedAt": {
+                "format": "date-time",
+                "required": true,
+                "type": "string"
+              },
+              "likesCount": {
+                "required": true,
+                "type": "number"
+              },
+              "commentsCount": {
+                "required": true,
+                "type": "number"
+              }
+            }
+          }
+        },
+        "required": ["post"]
+      },
+      "GetPostResponseDtoExample": {
+        "type": "object",
+        "properties": {
+          "post": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "required": true,
+                "type": "string"
+              },
+              "userId": {
+                "required": true,
+                "type": "string"
+              },
+              "slug": {
+                "required": true,
+                "type": "string"
+              },
+              "content": {
+                "required": true,
+                "type": "string"
+              },
+              "mediaUrl": {
+                "required": true,
+                "type": "string"
+              },
+              "hashtags": {
+                "required": true,
+                "type": "string"
+              },
+              "tags": {
+                "required": true,
+                "type": "string"
+              },
+              "lat": {
+                "required": true,
+                "type": "number"
+              },
+              "lng": {
+                "required": true,
+                "type": "number"
+              },
+              "isEdited": {
+                "required": true,
+                "type": "boolean"
+              },
+              "createdAt": {
+                "format": "date-time",
+                "required": true,
+                "type": "string"
+              },
+              "updatedAt": {
+                "format": "date-time",
+                "required": true,
+                "type": "string"
+              },
+              "likesCount": {
+                "required": true,
+                "type": "number"
+              },
+              "commentsCount": {
+                "required": true,
+                "type": "number"
+              }
+            }
+          }
+        },
+        "required": ["post"]
+      },
+      "GetPostLikesResponseDtoExample": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "example": 1
+          },
+          "likes": {
+            "type": "object",
+            "properties": {
+              "userId": {
+                "required": true,
+                "type": "string"
+              },
+              "username": {
+                "required": true,
+                "type": "string"
+              },
+              "name": {
+                "required": true,
+                "type": "string"
+              },
+              "avatar": {
+                "required": true,
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": ["count", "likes"]
+      },
+      "GetPostCommentsResponseDtoExample": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "example": 1
+          },
+          "comments": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "required": true,
+                "type": "string"
+              },
+              "postId": {
+                "required": true,
+                "type": "string"
+              },
+              "userId": {
+                "required": true,
+                "type": "string"
+              },
+              "userFirstName": {
+                "required": true,
+                "type": "string"
+              },
+              "userLastName": {
+                "required": true,
+                "type": "string"
+              },
+              "userAvatar": {
+                "required": true,
+                "type": "string"
+              },
+              "content": {
+                "required": true,
+                "type": "string"
+              },
+              "isEdited": {
+                "required": true,
+                "type": "boolean"
+              },
+              "createdAt": {
+                "format": "date-time",
+                "required": true,
+                "type": "string"
+              },
+              "updatedAt": {
+                "format": "date-time",
+                "required": true,
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": ["count", "comments"]
+      },
+      "CreateLikePostDto": {
+        "type": "object",
+        "properties": {
+          "postId": {
+            "type": "string",
+            "example": "0a9fb16e-47d9-4757-b635-d19207da2ee6"
+          }
+        },
+        "required": ["postId"]
+      },
+      "CreateCommentPostDto": {
+        "type": "object",
+        "properties": {
+          "postId": {
+            "type": "string",
+            "example": "cc0dee72-7d82-4310-bdd9-b9babb141f87"
+          },
+          "content": {
+            "type": "string",
+            "example": "example"
+          }
+        },
+        "required": ["postId", "content"]
+      },
+      "CreateCommentPostResponseDtoExample": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cc0dee72-7d82-4310-bdd9"
+          },
+          "content": {
+            "type": "string",
+            "example": "example"
+          },
+          "userId": {
+            "type": "string",
+            "example": "db11d4ca-c320-444f-afee-142c198a4d6d"
+          },
+          "postId": {
+            "type": "string",
+            "example": "db11d4ca-c320-444f-afee-142c198a4d6d"
+          },
+          "isEdited": {
+            "type": "boolean",
+            "example": false
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-02-06T18:44:13.264Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-02-06T18:44:13.264Z"
+          }
+        },
+        "required": ["id", "content", "userId", "postId", "isEdited", "createdAt", "updatedAt"]
+      },
+      "UpdateCommentPostDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "example": "example"
+          }
+        },
+        "required": ["content"]
+      },
+      "UpdateCommentPostResponseDtoExample": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cc0dee72-7d82-4310-bdd9"
+          },
+          "content": {
+            "type": "string",
+            "example": "example"
+          },
+          "userId": {
+            "type": "string",
+            "example": "db11d4ca-c320-444f-afee-142c198a4d6d"
+          },
+          "postId": {
+            "type": "string",
+            "example": "db11d4ca-c320-444f-afee-142c198a4d6d"
+          },
+          "isEdited": {
+            "type": "boolean",
+            "example": false
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-02-06T18:44:13.264Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-02-06T18:44:13.264Z"
+          }
+        },
+        "required": ["id", "content", "userId", "postId", "isEdited", "createdAt", "updatedAt"]
+      },
+      "GetCommentPostResponseDtoExample": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cc0dee72-7d82-4310-bdd9"
+          },
+          "content": {
+            "type": "string",
+            "example": "example"
+          },
+          "userId": {
+            "type": "string",
+            "example": "db11d4ca-c320-444f-afee-142c198a4d6d"
+          },
+          "postId": {
+            "type": "string",
+            "example": "db11d4ca-c320-444f-afee-142c198a4d6d"
+          },
+          "isEdited": {
+            "type": "boolean",
+            "example": false
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-02-06T18:44:13.264Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-02-06T18:44:13.264Z"
+          }
+        },
+        "required": ["id", "content", "userId", "postId", "isEdited", "createdAt", "updatedAt"]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "example",
+            "description": "username of the user account"
+          },
+          "password": {
+            "type": "string",
+            "example": "password123",
+            "description": "password of the user account"
+          }
+        },
+        "required": ["username", "password"]
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "object",
+            "properties": {
+              "token": {
+                "required": true,
+                "type": "string"
+              },
+              "expires_in": {
+                "required": true,
+                "type": "string"
+              }
+            }
+          },
+          "refresh_token": {
+            "type": "string"
+          }
+        },
+        "required": ["access_token", "refresh_token"]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refresh_token": {
+            "type": "string"
+          }
+        },
+        "required": ["refresh_token"]
+      },
+      "RefreshTokenResponseDto": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string"
+          }
+        },
+        "required": ["access_token"]
+      },
+      "GetFeedResponseDtoExample": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "example": 1
+          },
+          "posts": {
+            "example": {
+              "postId": "cc0dee72-7d82-4310-bdd9-b9babb141f87",
+              "userId": "6fcb4875-c4dc-4c8f-b15f-06f9fd8c18e8",
+              "postSlug": "1705349715553",
+              "userFirstName": "example",
+              "userLastName": "example",
+              "username": "example",
+              "postContent": "example",
+              "userAvatar": "example.jpg",
+              "postMediaUrl": "https://www.example.com/default.png",
+              "postTags": "user1,user2",
+              "postHashtags": "life,gg,prog",
+              "postLat": 90,
+              "postLng": 90,
+              "postCreatedAt": "2024-01-15T20:15:15.601Z",
+              "postLikesCount": 1,
+              "postCommentsCount": 1
+            },
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["count", "posts"]
+      },
+      "GetTopFeedResponseDtoExample": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "example": 1
+          },
+          "posts": {
+            "example": {
+              "postId": "cc0dee72-7d82-4310-bdd9-b9babb141f87",
+              "userId": "6fcb4875-c4dc-4c8f-b15f-06f9fd8c18e8",
+              "postSlug": "1705349715553",
+              "userFirstName": "example",
+              "userLastName": "example",
+              "username": "example",
+              "postContent": "example",
+              "userAvatar": "example.jpg",
+              "postMediaUrl": "https://www.example.com/default.png",
+              "postTags": "user1,user2",
+              "postHashtags": "life,gg,prog",
+              "postLat": 90,
+              "postLng": 90,
+              "postCreatedAt": "2024-01-15T20:15:15.601Z",
+              "postLikesCount": 1,
+              "postCommentsCount": 1,
+              "totalInteractions": 10
+            },
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["count", "posts"]
+      },
+      "GetPostsByHashtagsResponseDtoExample": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "example": 1
+          },
+          "posts": {
+            "example": {
+              "postId": "cc0dee72-7d82-4310-bdd9-b9babb141f87",
+              "userId": "6fcb4875-c4dc-4c8f-b15f-06f9fd8c18e8",
+              "postSlug": "1705349715553",
+              "userFirstName": "example",
+              "userLastName": "example",
+              "username": "example",
+              "postContent": "example",
+              "userAvatar": "example.jpg",
+              "postMediaUrl": "https://www.example.com/default.png",
+              "postTags": "user1,user2",
+              "postHashtags": "life,gg,prog",
+              "postLat": 90,
+              "postLng": 90,
+              "postCreatedAt": "2024-01-15T20:15:15.601Z",
+              "postLikesCount": 0,
+              "postCommentsCount": 0
+            },
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["count", "posts"]
+      },
+      "CreatePrivateRoomDto": {
+        "type": "object",
+        "properties": {
+          "receiver": {
+            "type": "string"
+          }
+        },
+        "required": ["receiver"]
+      },
+      "CreatePrivateRoomRespExample": {
+        "type": "object",
+        "properties": {
+          "PrvRoom": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "required": true,
+                "type": "string"
+              },
+              "isPrivate": {
+                "required": true,
+                "type": "boolean"
+              },
+              "members": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "username": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "email": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "firstName": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "bio": {
+                    "required": true,
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "avatar": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "birthDate": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "phone": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "isActive": {
+                    "required": true,
+                    "type": "boolean"
+                  },
+                  "updatedAt": {
+                    "required": true,
+                    "type": "string"
+                  }
+                }
+              },
+              "id": {
+                "required": true,
+                "type": "string"
+              },
+              "createdAt": {
+                "required": true,
+                "type": "string"
+              },
+              "updatedAt": {
+                "required": true,
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": ["PrvRoom"]
+      },
+      "CreatePublicRoomDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["name"]
+      },
+      "CreatePublicRoomRespExample": {
+        "type": "object",
+        "properties": {
+          "pubRoom": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "required": true,
+                "type": "string"
+              },
+              "name": {
+                "required": true,
+                "type": "string"
+              },
+              "isPrivate": {
+                "required": true,
+                "type": "boolean"
+              },
+              "createdAt": {
+                "format": "date-time",
+                "required": true,
+                "type": "string"
+              },
+              "updatedAt": {
+                "format": "date-time",
+                "required": true,
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": ["pubRoom"]
+      },
+      "UpdateMessageDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": ["text"]
+      }
+    }
+  }
+}

@@ -57,8 +57,10 @@ export class UserRepository {
     });
   }
 
-  async findChatRooms(userId: string, pageOptions: PageOptionsDto): Promise<User | undefined> {
-    return await this.userRepository.findOne({
+  async findChatRooms(userId: string, pageOptions: PageOptionsDto) {
+    const skip = pageOptions?.skip ?? 0;
+    const take = pageOptions?.take ?? 0;
+    const userWzRooms = await this.userRepository.findOne({
       where: {
         id: userId,
       },
@@ -67,6 +69,10 @@ export class UserRepository {
         rooms: { updatedAt: pageOptions?.order ?? 'DESC' },
       },
     });
+    // TODO: Redesign the relation
+    if (userWzRooms && userWzRooms.rooms) {
+      return userWzRooms.rooms.slice(skip, skip + take);
+    }
   }
 
   async findByEmail(email: string): Promise<UserDto | undefined> {

@@ -105,7 +105,7 @@ export class ChatService {
       return await this.roomRepository.createPublicRoom(payload.name);
     } catch (err) {
       this.logger.error(err);
-
+      if (err instanceof HttpException) throw err;
       if (err.code === PostgresError.UNIQUE_VIOLATION)
         throw new HttpException(
           'public room with the same name already exist',
@@ -127,9 +127,13 @@ export class ChatService {
     try {
       const sender = await this.userRepository.findById(senderId);
       const receiver = await this.userRepository.findById(payload.receiver);
+      if (!receiver) {
+        throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+      }
       return await this.roomRepository.createPrivateRoom(sender, receiver);
     } catch (err) {
       this.logger.error(err);
+      if (err instanceof HttpException) throw err;
       if (err.code === PostgresError.UNIQUE_VIOLATION)
         throw new HttpException('private room already exist', HttpStatus.CONFLICT);
       if (err.code === PostgresError.NOT_NULL_VIOLATION)
@@ -175,8 +179,11 @@ export class ChatService {
   async updateMessage(senderId: string, msgId: string, payload: UpdateMessageDto) {
     try {
       // check if user has this message
-      const realSenderId = (await this.messageRepository.findOne(msgId)).sender.id;
-      if (realSenderId !== senderId) {
+      const msg = await this.messageRepository.findOne(msgId);
+      if (!msg) {
+        throw new HttpException('message not found', HttpStatus.NOT_FOUND);
+      }
+      if (msg.sender.id !== senderId) {
         throw new HttpException('message does not belong to this user', HttpStatus.BAD_REQUEST);
       }
       await this.messageRepository.update(msgId, payload.text);
@@ -196,8 +203,11 @@ export class ChatService {
   async deleteMessage(senderId: string, msgId: string): Promise<void> {
     try {
       // check if user has this message
-      const realSenderId = (await this.messageRepository.findOne(msgId)).sender.id;
-      if (realSenderId !== senderId) {
+      const msg = await this.messageRepository.findOne(msgId);
+      if (!msg) {
+        throw new HttpException('message not found', HttpStatus.NOT_FOUND);
+      }
+      if (msg.sender.id !== senderId) {
         throw new HttpException('message does not belong to this user', HttpStatus.BAD_REQUEST);
       }
       await this.messageRepository.delete(msgId);
@@ -208,7 +218,6 @@ export class ChatService {
     }
   }
 
-  // FIXME: Add the correct pagination for the repo
   /**
    * `findMyRooms` gets all the chat rooms of the user with this `userId`.
    * @param userId ID of the user.
@@ -216,7 +225,12 @@ export class ChatService {
    * @returns Promise with an array of user 's rooms.
    */
   async findMyRooms(userId: string, pageOptionsDto?: PageOptionsDto): Promise<Room[]> {
-    return (await this.userRepository.findChatRooms(userId, pageOptionsDto)).rooms;
+    try {
+      return await this.userRepository.findChatRooms(userId, pageOptionsDto);
+    } catch (err) {
+      this.logger.error(err);
+      throw new InternalServerErrorException();
+    }
   }
 
   /**

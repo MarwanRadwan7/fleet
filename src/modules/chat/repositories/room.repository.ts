@@ -53,7 +53,6 @@ export class RoomRepository {
   // TODO: Delete publicRoom
   // TODO: Update publicRoom
 
-  // FIXME: Fix the saving and using upsert
   async save(room: Room): Promise<Room> {
     return await this.roomRepository.save(room);
   }

@@ -50,8 +50,8 @@ import { PageOptionsDto } from 'src/common/dto/pagination';
 
 @Controller('posts')
 @UseInterceptors(CacheInterceptor)
-@ApiTags('Posts')
 @UseGuards(ThrottlerGuard)
+@ApiTags('Posts')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 

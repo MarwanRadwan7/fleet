@@ -105,7 +105,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     // Fetch the receiver socket and
     // join the two clients to their private room
     const receiverSocketObject = await this.server.sockets.get(receiverSocketId);
-    await receiverSocketObject.join(createdMessage.room.name);
+    if (receiverSocketObject) {
+      await receiverSocketObject.join(createdMessage.room.name);
+    }
     await client.join(createdMessage.room.name);
 
     // if receiver is online
@@ -114,3 +116,5 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
   }
 }
+
+// TODO: Add typing event
