@@ -3,7 +3,7 @@
   "version": "2.0",
   "description": "Social Media Application.",
   "author": "MarwanRadwan7",
-  "private": true,
+  "private": false,
   "license": "MIT",
   "scripts": {
     "build": "nest build",

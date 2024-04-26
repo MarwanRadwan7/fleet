@@ -15,7 +15,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   const configService = app.get(ConfigService);
-  const PORT = configService.get('PORT') || 3000;
+  const PORT = configService.get('APP_PORT') || 3000;
 
   // OpenApi - Swagger
   const swaggerOptions = new DocumentBuilder()
