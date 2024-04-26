@@ -7,8 +7,9 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { verify } from 'argon2';
 
-import { LoginResponseDto, RefreshTokenResponseDto, LoginDto } from './dto';
-import { UserRepository } from 'src/user/user.repository';
+import { LoginResponseDto, RefreshTokenResponseDto } from './dto';
+import { UserRepository } from 'src//modules/user/user.repository';
+import { User } from 'src//modules/user/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -43,8 +44,14 @@ export class AuthService {
     }
   }
 
-  async login(userId: string, user: LoginDto): Promise<LoginResponseDto> {
-    const payload = { id: userId, sub: { username: user.username } };
+  async login(userId: string, userData: User): Promise<LoginResponseDto> {
+    const payload = {
+      user_id: userId,
+      sub: { username: userData.username },
+      email: userData.email,
+      role: userData.role,
+      is_active: userData.isActive,
+    };
     return {
       access_token: {
         token: await this.jwtService.signAsync(payload),
@@ -54,8 +61,14 @@ export class AuthService {
     };
   }
 
-  async refreshToken(userId: string, user: LoginDto): Promise<RefreshTokenResponseDto> {
-    const payload = { id: userId, sub: { username: user.username } };
+  async refreshToken(userId: string, userData: User): Promise<RefreshTokenResponseDto> {
+    const payload = {
+      user_id: userId,
+      sub: { username: userData.username },
+      email: userData.email,
+      role: userData.role,
+      is_active: userData.isActive,
+    };
     return {
       access_token: await this.jwtService.signAsync(payload),
     };

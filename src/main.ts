@@ -9,12 +9,13 @@ import * as morgan from 'morgan';
 // import * as csurf from 'csurf';
 
 import { AppModule } from './app.module';
+import { SocketIOAdapter } from './config/socket-io-adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   const configService = app.get(ConfigService);
-  const PORT = configService.get('PORT') || 3000;
+  const PORT = configService.get('APP_PORT') || 3000;
 
   // OpenApi - Swagger
   const swaggerOptions = new DocumentBuilder()
@@ -46,16 +47,19 @@ async function bootstrap() {
     methods: ['GET', 'OPTIONS'],
     credentials: true,
   });
+  app.useWebSocketAdapter(new SocketIOAdapter(app, configService));
+
   app.use(helmet());
   app.disable('x-powered-by');
   // app.use(csurf());
 
   app.use(compress());
-  app.use(morgan('dev'));
+  app.use(morgan('combined'));
 
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
+      transform: true,
     }),
   );
 

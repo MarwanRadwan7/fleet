@@ -1,30 +1,27 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Fleet
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+[![Version][version-shield]](version-url)
+[![Stargazers][stars-shield]][stars-url]
+[![MIT License][license-shield]][license-url]
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
+
+  <p align="center">Fleet is a social media application to share your thoughts, make new fiends and text with your friends</p>
     <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
+
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## Docs
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- [API Documentation](https://app.swaggerhub.com/apis/MarwanRadwan/Fleet/1.5): list of the application 's backend endpoints.
+- [Database Schema](/docs/fleet-db.png): Database Design of the app and it also available in `.dbml` format.
+- ### App is Built With:
+  - TypeScript
+  - NestJS
+  - PostgreSQL
+  - TypeORM
+  - Redis Caching
+  - SocketIO
+  - Cloudinary
 
 ## Installation
 
@@ -32,7 +29,26 @@
 $ npm install
 ```
 
+## Features
+
+- App comes with following features:
+  - Protected endpoints either the REST or WebSockets with JWT Tokens.
+  - Cached Responses for better performance.
+  - Exceptions and Error handling.
+  - RateLimiting for the endpoints.
+  - SQL Injection and CORS protection.
+- Users can do the following:
+  - Posting with the ability to attach media to the posts.
+  - Find the posts with hashtags they are interested in.
+  - Comment and like other user's posts.
+  - Follow other users amd block unwanted users.
+  - Create public chat groups.
+  - Chat in public groups or with other users privately.
+  - Get a feed of posts either from their following users or get the top trending posts based on the overall interactions.
+
 ## Running the app
+
+The `.env` file should have these environment variables similar to the [example.env](./docs/example.env)
 
 ```bash
 # development
@@ -45,29 +61,19 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
 ## License
 
-Nest is [MIT licensed](LICENSE).
+Fleet is [MIT licensed](LICENSE).
+
+[version-shield]: https://img.shields.io/github/package-json/v/MarwanRadwan7/fleet?style=for-the-badge
+[version-url]: https://github.com/MarwanRadwan7/fleet
+[contributors-shield]: https://img.shields.io/github/contributors/MarwanRadwan7/fleet.svg?style=for-the-badge
+[contributors-url]: https://github.com/MarwanRadwan7/fleet/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/MarwanRadwan7/fleet.svg?style=for-the-badge
+[forks-url]: https://github.com/MarwanRadwan7/fleet/forks
+[stars-shield]: https://img.shields.io/github/stars/MarwanRadwan7/fleet.svg?style=for-the-badge
+[stars-url]: https://github.com/MarwanRadwan7/fleet/stargazers
+[issues-shield]: https://img.shields.io/github/issues/MarwanRadwan7/fleet.svg?style=for-the-badge
+[issues-url]: https://github.com/MarwanRadwan7/fleet/issues
+[license-shield]: https://img.shields.io/github/license/MarwanRadwan7/fleet.svg?style=for-the-badge
+[license-url]: https://github.com/MarwanRadwan7/fleet/blob/main/LICENSE

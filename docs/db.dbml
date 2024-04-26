@@ -1,0 +1,140 @@
+
+Table users{
+  id UUID [primary key]
+  username VARCHAR(30) [unique, not null]
+  email VARCHAR(30) [unique, not null]
+  password VARCHAR(240) [not null]
+  first_name VARCHAR(30) [not null]
+  last_name VARCHAR(30) [not null]
+  phone VARCHAR(30) [NOT NULL]
+  avatar VARCHAR(240) [default: 'default.png']
+  birth_date DATETIME [NOT NULL]
+  bio  VARCHAR(30)
+  is_active BOOLEAN [DEFAULT: TRUE]
+  role ROLE [DEFAULT:'MEMBER']
+  created_at DATETIME [default: `CURRENT_TIMESTAMP`]
+  updated_at DATETIME [default: `CURRENT_TIMESTAMP`]
+}
+
+Table posts{
+  id UUID [primary key]
+  user_id UUID [ref: > users.id , NOT NULL , UNIQUE]
+  content VARCHAR(240) [not null]
+  slug VARCHAR(240)
+  media_url VARCHAR(2048)
+  media_thumbnail VARCHAR(30)
+  hashtags VARCHAR(240)
+  tags VARCHAR(240)
+  lat DECIMAL
+  lng DECIMAL
+  is_edited BOOLEAN
+  likes_count INT [default: 0]
+  comments_count INT [default: 0]
+  created_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    user_id [name:'idx_posts_user_id']
+  }
+}
+
+Table followings {
+  id UUID [primary key]
+  user_id UUID 
+  following_id UUID 
+  created_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    (user_id, following_id) [unique]
+  }
+}
+
+Table followers {
+  id UUID [primary key]
+  user_id UUID [not null]
+  follower_id UUID [not null]
+  created_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    (user_id, follower_id) [unique]
+  }
+}
+
+Table blocks {
+  id UUID [primary key]
+  user_id UUID [not null]
+  friend_id UUID [not null]
+  created_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    (user_id, friend_id) [unique, name: "unique_block"]
+  }
+}
+
+Table post_likes {
+  id UUID [primary key]
+  user_id UUID [not null]
+  post_id UUID [not null]
+
+  indexes {
+    (user_id,post_id) [unique, name:'unique_like_record']
+  }
+}
+
+Table post_comments {
+  id UUID [primary key]
+  user_id UUID [not null]
+  post_id UUID [not null]
+  content VARCHAR(240) [not null]
+  is_edited BOOLEAN [default: false]
+  created_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+}
+
+Table rooms {
+  id UUID [primary key]
+  name VARCHAR [not null, unique]
+  is_private BOOLEAN [default: true]
+  created_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+}
+
+// for the many-to-many relation
+Table room_members {
+  room_id UUID [not null]
+  user_id UUID [not null]
+}
+
+Table messages {
+  id UUID [primary key]
+  message VARCHAR [not null]
+  author_id UUID [not null]
+  room_id UUID [not null]
+  is_edited BOOLEAN [default: false]
+  created_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+}
+
+enum ROLE {
+  ADMIN
+  MEMBER
+}
+
+  // Relations
+  Ref: followers.user_id > users.id [delete: cascade, update: cascade]
+  Ref: followers.follower_id > users.id [delete: cascade, update: cascade]
+  Ref: blocks.user_id < users.id [delete: cascade, update: cascade]
+  Ref: blocks.friend_id < users.id [delete: cascade, update: cascade]
+  Ref: post_likes.post_id < posts.id [delete: cascade, update: cascade]
+  Ref: post_likes.user_id < users.id [delete: cascade, update: cascade]
+  Ref:post_comments.user_id < users.id [delete: cascade, update: cascade]
+  Ref:post_comments.post_id < posts.id [delete: cascade, update: cascade]
+  Ref: messages.author_id < users.id [delete: cascade, update: cascade]
+  Ref: messages.room_id < rooms.id  [delete: cascade, update: cascade]
+  Ref:room_members.room_id <> rooms.id [delete: cascade, update: cascade]
+  Ref:room_members.user_id <> users.id [delete: cascade, update: cascade]
+  Ref: followings.user_id > users.id [delete: cascade, update: cascade]
+  Ref: followings.following_id > users.id [delete: cascade, update: cascade]
