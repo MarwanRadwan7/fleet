@@ -32,6 +32,23 @@
 $ npm install
 ```
 
+## Features
+
+- App comes with following features:
+  - Protected endpoints either the REST or WebSockets with JWT Tokens.
+  - Cached Responses for better performance.
+  - Exceptions and Error handling.
+  - RateLimiting for the endpoints.
+  - SQL Injection and CORS protection.
+- Users can do the following:
+  - Posting with the ability to attach media to the posts.
+  - Find the posts with hashtags they are interested in.
+  - Comment and like other user's posts.
+  - Follow other users amd block unwanted users.
+  - Create public chat groups.
+  - Chat in public groups or with other users privately.
+  - Get a feed of posts either from their following users or get the top trending posts based on the overall interactions.
+
 ## Running the app
 
 The `.env` file should have these environment variables similar to the [example.env](./docs/example.env)
