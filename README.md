@@ -4,9 +4,6 @@
 [![Stargazers][stars-shield]][stars-url]
 [![MIT License][license-shield]][license-url]
 
-<p align="center">
-  <a href="#" target="blank"><img src="/docs/fleet-logo.png" width="200" height="200" alt="fleet Logo" /></a>
-</p>
 
   <p align="center">Fleet is a social media application to share your thoughts, make new fiends and text with your friends</p>
     <p align="center">
