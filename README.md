@@ -23,11 +23,6 @@
   - SocketIO
   - Cloudinary
 
-## Installation
-
-```bash
-$ npm install
-```
 
 ## Features
 
@@ -45,6 +40,12 @@ $ npm install
   - Create public chat groups.
   - Chat in public groups or with other users privately.
   - Get a feed of posts either from their following users or get the top trending posts based on the overall interactions.
+
+## Installation
+
+```bash
+$ npm install
+```
 
 ## Running the app
 
